@@ -1,11 +1,26 @@
 import { useState, useEffect } from 'react';
 import PlayerModal from './PlayerModal';
+import FilterModal from './FilterModal';
 
 const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
   const [players, setPlayers] = useState(initialPlayers || []);
   const [teams, setTeams] = useState(initialTeams || {});
   const [sortConfig, setSortConfig] = useState({ key: 'total_points', direction: 'desc' });
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filters, setFilters] = useState({
+    playerName: '',
+    team: '',
+    position: '',
+    minValue: '',
+    maxValue: '',
+    minPoints: '',
+    maxPoints: '',
+    minPPG: '',
+    maxPPG: '',
+    minForm: '',
+    maxForm: ''
+  });
 
   // Update state when props change
   useEffect(() => {
@@ -31,8 +46,73 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
     setSortConfig({ key, direction });
   };
 
+  const applyFilters = (playerList) => {
+    return playerList.filter(player => {
+      // Player name filter
+      if (filters.playerName && !player.web_name.toLowerCase().includes(filters.playerName.toLowerCase())) {
+        return false;
+      }
+
+      // Team filter
+      if (filters.team && player.team.toString() !== filters.team) {
+        return false;
+      }
+
+      // Position filter
+      if (filters.position && player.element_type.toString() !== filters.position) {
+        return false;
+      }
+
+      // Price range filter
+      const price = player.now_cost / 10;
+      if (filters.minValue && price < parseFloat(filters.minValue)) {
+        return false;
+      }
+      if (filters.maxValue && price > parseFloat(filters.maxValue)) {
+        return false;
+      }
+
+      // Total points range filter
+      if (filters.minPoints && player.total_points < parseInt(filters.minPoints)) {
+        return false;
+      }
+      if (filters.maxPoints && player.total_points > parseInt(filters.maxPoints)) {
+        return false;
+      }
+
+      // Points per game range filter
+      const ppg = parseFloat(player.points_per_game);
+      if (filters.minPPG && ppg < parseFloat(filters.minPPG)) {
+        return false;
+      }
+      if (filters.maxPPG && ppg > parseFloat(filters.maxPPG)) {
+        return false;
+      }
+
+      // Player form range filter
+      const form = parseFloat(player.form);
+      if (filters.minForm && form < parseFloat(filters.minForm)) {
+        return false;
+      }
+      if (filters.maxForm && form > parseFloat(filters.maxForm)) {
+        return false;
+      }
+
+      return true;
+    });
+  };
+
+  const hasActiveFilters = () => {
+    return Object.values(filters).some(value => value !== '');
+  };
+
+  const handleApplyFilters = (newFilters) => {
+    setFilters(newFilters);
+  };
+
   const getSortedPlayers = () => {
-    const sortedPlayers = [...players];
+    const filteredPlayers = applyFilters(players);
+    const sortedPlayers = [...filteredPlayers];
     
     sortedPlayers.sort((a, b) => {
       let aValue = a[sortConfig.key];
@@ -85,9 +165,24 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
 
   return (
     <>
-      <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">
-        Fantasy Premier League Player Stats
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-gray-800">
+          Fantasy Premier League Player Stats
+        </h2>
+        <button
+          onClick={() => setShowFilterModal(true)}
+          className={`px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
+            hasActiveFilters()
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          {hasActiveFilters() ? 'Filters Active' : 'Filter'}
+        </button>
+      </div>
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto">
@@ -202,6 +297,15 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
           onClose={handleCloseModal}
         />
       )}
+
+      {/* Filter Modal */}
+      <FilterModal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        onApplyFilters={handleApplyFilters}
+        currentFilters={filters}
+        teams={teams}
+      />
     </>
   );
 };
