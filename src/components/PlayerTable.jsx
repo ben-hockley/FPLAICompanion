@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import PlayerModal from './PlayerModal';
 import FilterModal from './FilterModal';
+import StatusIcon from './StatusIcon';
 
 const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
   const [players, setPlayers] = useState(initialPlayers || []);
@@ -247,7 +248,10 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
                   className="hover:bg-blue-50 transition-colors cursor-pointer"
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {player.web_name}
+                    <div className="flex items-center gap-2">
+                      {player.web_name}
+                      <StatusIcon status={player.status} />
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {teams[player.team]}

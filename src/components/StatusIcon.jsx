@@ -1,0 +1,26 @@
+// Status icon component for player availability status
+const StatusIcon = ({ status, className = "" }) => {
+  if (!status || status === 'a') return null;
+
+  const statusConfig = {
+    i: { color: 'bg-red-500', text: 'Injured', icon: 'I' },
+    d: { color: 'bg-yellow-500', text: 'Doubtful', icon: 'D' },
+    u: { color: 'bg-gray-500', text: 'Unavailable', icon: 'U' },
+    s: { color: 'bg-orange-500', text: 'Suspended', icon: 'S' }
+  };
+
+  const config = statusConfig[status.toLowerCase()];
+  if (!config) return null;
+
+  return (
+    <span 
+      className={`inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white ${config.color} rounded-full ${className}`}
+      title={config.text}
+      aria-label={config.text}
+    >
+      {config.icon}
+    </span>
+  );
+};
+
+export default StatusIcon;

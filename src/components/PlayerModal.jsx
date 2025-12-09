@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import StatusIcon from './StatusIcon';
 
 const PlayerModal = ({ player, teams, onClose }) => {
   const [playerDetails, setPlayerDetails] = useState(null);
@@ -151,8 +152,9 @@ const PlayerModal = ({ player, teams, onClose }) => {
             </div>
             
             <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-2">
+              <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
                 {player.first_name} {player.second_name}
+                <StatusIcon status={player.status} className="w-5 h-5 text-xs" />
               </h2>
               <div className="flex flex-wrap gap-3 mb-3">
                 <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">

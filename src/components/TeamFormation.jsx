@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import PlayerModal from './PlayerModal';
+import StatusIcon from './StatusIcon';
 
 const TeamFormation = ({ allPlayers, teams }) => {
   const [managerId, setManagerId] = useState('');
@@ -118,8 +119,9 @@ const TeamFormation = ({ allPlayers, teams }) => {
         `}
       >
         <div className="text-center flex-1 flex flex-col justify-center">
-          <div className={`${isSub ? 'text-xs' : 'text-sm'} font-bold text-gray-900 truncate w-full px-1`}>
-            {player.web_name}
+          <div className={`${isSub ? 'text-xs' : 'text-sm'} font-bold text-gray-900 truncate w-full px-1 flex items-center justify-center gap-1`}>
+            <span className="truncate">{player.web_name}</span>
+            <StatusIcon status={player.status} />
           </div>
           <div className={`${isSub ? 'text-[10px]' : 'text-xs'} text-gray-800`}>
             {teams[player.team]}
