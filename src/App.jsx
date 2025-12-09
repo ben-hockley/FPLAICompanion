@@ -67,10 +67,28 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <PlayerTable players={players} teams={teams} />
-      <div className="py-8">
-        <TeamFormation allPlayers={players} teams={teams} />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
+      <div className="max-w-full mx-auto">
+        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
+          FPL AI Companion
+        </h1>
+        
+        {/* Two-column layout: side by side on large screens, stacked on small screens */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+          {/* Left Box: My Team Formation */}
+          <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col w-full max-h-[calc(100vh-8rem)]">
+            <div className="flex-1 min-h-0 overflow-auto">
+              <TeamFormation allPlayers={players} teams={teams} />
+            </div>
+          </div>
+
+          {/* Right Box: Player Stats Table */}
+          <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col w-full max-h-[calc(100vh-8rem)]">
+            <div className="flex-1 min-h-0 overflow-auto">
+              <PlayerTable players={players} teams={teams} />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

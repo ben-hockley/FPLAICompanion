@@ -150,14 +150,15 @@ const TeamFormation = ({ allPlayers, teams }) => {
   const handleCloseModal = () => setSelectedPlayer(null);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
+    <>
+      <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">
         My FPL Team
       </h2>
 
-      {/* Manager ID Input */}
-      <div className="max-w-md mx-auto mb-8">
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+      <div className="flex-1 flex flex-col overflow-y-auto px-4">
+        {/* Manager ID Input */}
+        <div className="mb-6">
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             FPL Manager ID
           </label>
@@ -296,10 +297,12 @@ const TeamFormation = ({ allPlayers, teams }) => {
           </div>
         </div>
       )}
+      
       {selectedPlayer && (
         <PlayerModal player={selectedPlayer} teams={teams} onClose={handleCloseModal} />
       )}
     </div>
+    </>
   );
 };
 
