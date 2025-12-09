@@ -76,7 +76,7 @@ const PlayerModal = ({ player, teams, onClose }) => {
   };
 
   const getPhotoUrl = (code) => {
-    return `https://resources.premierleague.com/premierleague/photos/players/110x140/p${code}.png`;
+    return `https://resources.premierleague.com/premierleague25/photos/players/110x140/${code}.png`;
   };
 
   const getOpponentName = (opponentTeam, wasHome) => {
