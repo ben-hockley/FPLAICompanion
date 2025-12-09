@@ -10,6 +10,8 @@ const TeamFormation = ({ allPlayers, teams }) => {
   const [error, setError] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showTransferRecs, setShowTransferRecs] = useState(false);
+  const [currentGameweek, setCurrentGameweek] = useState(15);
+  const [showHelp, setShowHelp] = useState(false);
 
   const CURRENT_GAMEWEEK = 15;
 
@@ -22,7 +24,7 @@ const TeamFormation = ({ allPlayers, teams }) => {
 
   
 
-  const fetchTeam = async () => {
+  const fetchTeam = async (gameweek = currentGameweek) => {
     if (!managerId || managerId.trim() === '') {
       setError('Please enter a valid Manager ID');
       return;
@@ -32,7 +34,7 @@ const TeamFormation = ({ allPlayers, teams }) => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/entry/${managerId}/event/${CURRENT_GAMEWEEK}/picks/`);
+      const response = await fetch(`/api/entry/${managerId}/event/${gameweek}/picks/`);
       
       if (!response.ok) {
         throw new Error('Manager ID not found or invalid');
@@ -40,19 +42,43 @@ const TeamFormation = ({ allPlayers, teams }) => {
 
       const data = await response.json();
       
-      // Match picks with player data
-      const enrichedPicks = data.picks.map(pick => {
+      // Fetch player details for this gameweek to get correct points
+      const enrichedPicks = await Promise.all(data.picks.map(async pick => {
         const player = allPlayers.find(p => p.id === pick.element);
+        
+        // Fetch player's gameweek history to get points for this specific gameweek
+        try {
+          const playerResponse = await fetch(`/api/element-summary/${pick.element}/`);
+          if (playerResponse.ok) {
+            const playerData = await playerResponse.json();
+            const gwHistory = playerData.history.find(h => h.round === gameweek);
+            
+            return {
+              ...pick,
+              playerData: {
+                ...player,
+                event_points: gwHistory ? gwHistory.total_points : 0
+              }
+            };
+          }
+        } catch (err) {
+          console.error(`Failed to fetch player ${pick.element} details:`, err);
+        }
+        
         return {
           ...pick,
-          playerData: player
+          playerData: {
+            ...player,
+            event_points: 0
+          }
         };
-      });
+      }));
 
       setTeamData({
         ...data,
         picks: enrichedPicks
       });
+      setCurrentGameweek(gameweek);
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -63,6 +89,22 @@ const TeamFormation = ({ allPlayers, teams }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     fetchTeam();
+  };
+
+  const goToPreviousGameweek = () => {
+    if (currentGameweek > 1) {
+      fetchTeam(currentGameweek - 1);
+    }
+  };
+
+  const goToNextGameweek = () => {
+    if (currentGameweek < CURRENT_GAMEWEEK) {
+      fetchTeam(currentGameweek + 1);
+    }
+  };
+
+  const goToCurrentGameweek = () => {
+    fetchTeam(CURRENT_GAMEWEEK);
   };
 
   const clearTeam = () => {
@@ -163,8 +205,18 @@ const TeamFormation = ({ allPlayers, teams }) => {
         {/* Manager ID Input */}
         <div className="mb-6">
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
             FPL Manager ID
+            <button
+              type="button"
+              onClick={() => setShowHelp(true)}
+              className="text-blue-600 hover:text-blue-700 transition"
+              title="How to find your Manager ID"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+              </svg>
+            </button>
           </label>
           <div className="flex gap-3">
             <input
@@ -183,10 +235,6 @@ const TeamFormation = ({ allPlayers, teams }) => {
               {loading ? 'Loading...' : 'Load Team'}
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            Gameweek {CURRENT_GAMEWEEK} • Find your Manager ID in the FPL app under "Points"
-          </p>
-          {/* Clear Team button removed as requested */}
         </form>
 
         {error && (
@@ -200,11 +248,57 @@ const TeamFormation = ({ allPlayers, teams }) => {
       {/* Team Formation Display */}
       {teamData && (
         <div className="max-w-5xl mx-auto">
-          {/* Total Points */}
+          {/* Total Points with Gameweek Navigation */}
           <div className="text-center mb-6">
-            <div className="inline-block bg-white rounded-lg shadow-md px-8 py-4">
-              <div className="text-sm text-gray-600 font-medium">Gameweek {CURRENT_GAMEWEEK} Points</div>
-              <div className="text-4xl font-bold text-blue-600">{calculateTotalPoints()}</div>
+            <div className="inline-flex items-center gap-3">
+              {/* Previous Gameweek Button */}
+              {currentGameweek > 1 && (
+                <button
+                  onClick={goToPreviousGameweek}
+                  disabled={loading}
+                  className="bg-white rounded-lg shadow-md p-3 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Previous gameweek"
+                >
+                  <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Points Display */}
+              <div className="bg-white rounded-lg shadow-md px-8 py-4">
+                <div className="text-sm text-gray-600 font-medium">Gameweek {currentGameweek} Points</div>
+                <div className="text-4xl font-bold text-blue-600">{calculateTotalPoints()}</div>
+              </div>
+
+              {/* Next Gameweek Button */}
+              {currentGameweek < CURRENT_GAMEWEEK && (
+                <button
+                  onClick={goToNextGameweek}
+                  disabled={loading}
+                  className="bg-white rounded-lg shadow-md p-3 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Next gameweek"
+                >
+                  <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Go to Current Gameweek Button */}
+              {currentGameweek !== CURRENT_GAMEWEEK && (
+                <button
+                  onClick={goToCurrentGameweek}
+                  disabled={loading}
+                  className="bg-blue-600 text-white rounded-lg shadow-md px-4 py-3 hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center gap-2"
+                  title="Go to current gameweek"
+                >
+                  <span className="text-sm">Current GW</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
 
@@ -328,6 +422,98 @@ const TeamFormation = ({ allPlayers, teams }) => {
           allPlayers={allPlayers}
           teams={teams}
         />
+      )}
+
+      {/* Help Modal */}
+      {showHelp && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowHelp(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-t-lg">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">How to Find Your FPL Manager ID</h2>
+                <button
+                  onClick={() => setShowHelp(false)}
+                  className="text-white hover:text-gray-200 text-3xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="space-y-4">
+                <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                  <h3 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                    <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span>
+                    Go to the FPL Website
+                  </h3>
+                  <p className="text-blue-800 ml-8">
+                    Visit <a href="https://fantasy.premierleague.com" target="_blank" rel="noopener noreferrer" className="underline font-semibold">fantasy.premierleague.com</a> and sign in to your account.
+                  </p>
+                </div>
+
+                <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded">
+                  <h3 className="font-bold text-green-900 mb-2 flex items-center gap-2">
+                    <span className="bg-green-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
+                    Navigate to the Points Tab
+                  </h3>
+                  <p className="text-green-800 ml-8">
+                    Once signed in, click on the <strong>"Points"</strong> tab in the navigation menu.
+                  </p>
+                </div>
+
+                <div className="bg-purple-50 border-l-4 border-purple-600 p-4 rounded">
+                  <h3 className="font-bold text-purple-900 mb-2 flex items-center gap-2">
+                    <span className="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">3</span>
+                    Find Your Manager ID in the URL
+                  </h3>
+                  <p className="text-purple-800 ml-8">
+                    Look at the URL in your browser's address bar. Your Manager ID is the number that appears after <code className="bg-purple-200 px-2 py-1 rounded">/entry/</code>
+                  </p>
+                  <p className="text-purple-800 ml-8 mt-2 text-sm">
+                    Example: In the URL <code className="bg-purple-200 px-2 py-1 rounded text-xs">fantasy.premierleague.com/entry/<strong>2235133</strong>/event/15</code>, the Manager ID is <strong>2235133</strong>
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                <h3 className="font-bold text-gray-900 mb-3 text-center">Visual Guide</h3>
+                <img 
+                  src="/manager-id-help.svg" 
+                  alt="How to find Manager ID" 
+                  className="w-full rounded-lg shadow-md"
+                />
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-400 rounded-lg p-4">
+                <div className="flex gap-3">
+                  <svg className="w-6 h-6 text-yellow-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <h4 className="font-semibold text-yellow-900">Note</h4>
+                    <p className="text-sm text-yellow-800">Your Manager ID is unique to your FPL account and remains the same throughout all seasons.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowHelp(false)}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
+                >
+                  Got it!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
     </>

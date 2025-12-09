@@ -1,0 +1,75 @@
+<svg width="800" height="300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Browser Window -->
+  <rect x="10" y="10" width="780" height="280" fill="#f3f4f6" stroke="#d1d5db" stroke-width="2" rx="8"/>
+  
+  <!-- Browser Address Bar -->
+  <rect x="20" y="20" width="760" height="40" fill="white" stroke="#d1d5db" stroke-width="1" rx="4"/>
+  <text x="35" y="45" font-family="Arial, sans-serif" font-size="14" fill="#374151">
+    https://fantasy.premierleague.com/entry/2235133/event/15
+  </text>
+  
+  <!-- Arrow pointing to Manager ID in URL -->
+  <path d="M 400 70 L 400 100 L 380 100" stroke="#ef4444" stroke-width="3" fill="none" marker-end="url(#arrowred)"/>
+  <circle cx="350" cy="43" r="35" stroke="#ef4444" stroke-width="3" fill="none"/>
+  <text x="410" y="90" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ef4444">
+    Manager ID (2235133)
+  </text>
+  
+  <!-- Browser Navigation Tabs -->
+  <rect x="20" y="70" width="760" height="50" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+  
+  <!-- Premier League Logo Area -->
+  <rect x="30" y="80" width="120" height="30" fill="white" rx="4"/>
+  <text x="45" y="100" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#37003c">
+    Premier League
+  </text>
+  
+  <!-- Fantasy Navigation -->
+  <rect x="160" y="75" width="620" height="40" fill="#7c3aed" stroke="#6d28d9" stroke-width="1"/>
+  <text x="280" y="100" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">
+    Fantasy
+  </text>
+  
+  <!-- Tabs Section -->
+  <rect x="20" y="125" width="760" height="40" fill="#0891b2" stroke="#0e7490" stroke-width="1"/>
+  
+  <!-- Status Tab -->
+  <rect x="30" y="132" width="60" height="26" fill="#06b6d4" rx="3"/>
+  <text x="40" y="149" font-family="Arial, sans-serif" font-size="12" fill="white">Status</text>
+  
+  <!-- Points Tab (Highlighted) -->
+  <rect x="100" y="132" width="60" height="26" fill="white" rx="3"/>
+  <text x="110" y="149" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0891b2">Points</text>
+  
+  <!-- Arrow pointing to Points Tab -->
+  <path d="M 130 185 L 130 165" stroke="#ef4444" stroke-width="3" fill="none" marker-end="url(#arrowred2)"/>
+  <text x="80" y="205" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ef4444">
+    Click "Points" tab
+  </text>
+  
+  <!-- Other Tabs -->
+  <rect x="170" y="132" width="80" height="26" fill="#06b6d4" rx="3"/>
+  <text x="175" y="149" font-family="Arial, sans-serif" font-size="12" fill="white">Pick Team</text>
+  
+  <rect x="260" y="132" width="80" height="26" fill="#06b6d4" rx="3"/>
+  <text x="267" y="149" font-family="Arial, sans-serif" font-size="12" fill="white">Transfers</text>
+  
+  <rect x="350" y="132" width="60" height="26" fill="#06b6d4" rx="3"/>
+  <text x="360" y="149" font-family="Arial, sans-serif" font-size="12" fill="white">Stats</text>
+  
+  <!-- Content Area -->
+  <rect x="20" y="170" width="760" height="110" fill="white" stroke="#d1d5db" stroke-width="1"/>
+  <text x="40" y="195" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">
+    Your team and gameweek points will be displayed here...
+  </text>
+  
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrowred" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#ef4444" />
+    </marker>
+    <marker id="arrowred2" markerWidth="10" markerHeight="10" refX="3" refY="0" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,9 L6,9 L3,0 z" fill="#ef4444" />
+    </marker>
+  </defs>
+</svg>
