@@ -71,6 +71,8 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
       <span className="ml-1">↓</span>;
   };
 
+  
+
   const handlePlayerClick = (player) => {
     setSelectedPlayer(player);
   };

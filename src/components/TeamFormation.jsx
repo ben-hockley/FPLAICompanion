@@ -17,6 +17,8 @@ const TeamFormation = ({ allPlayers, teams }) => {
     4: 'FWD'
   };
 
+  
+
   const fetchTeam = async () => {
     if (!managerId || managerId.trim() === '') {
       setError('Please enter a valid Manager ID');
