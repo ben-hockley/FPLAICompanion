@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PlayerModal from './PlayerModal';
 
 const PlayerTable = () => {
   const [players, setPlayers] = useState([]);
@@ -6,6 +7,7 @@ const PlayerTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'total_points', direction: 'desc' });
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   const POSITION_MAP = {
     1: 'GK',
@@ -92,6 +94,14 @@ const PlayerTable = () => {
     return sortConfig.direction === 'asc' ? 
       <span className="ml-1">↑</span> : 
       <span className="ml-1">↓</span>;
+  };
+
+  const handlePlayerClick = (player) => {
+    setSelectedPlayer(player);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedPlayer(null);
   };
 
   if (loading) {
@@ -190,7 +200,8 @@ const PlayerTable = () => {
                 {sortedPlayers.map((player) => (
                   <tr 
                     key={player.id}
-                    className="hover:bg-blue-50 transition-colors"
+                    onClick={() => handlePlayerClick(player)}
+                    className="hover:bg-blue-50 transition-colors cursor-pointer"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {player.web_name}
@@ -231,10 +242,19 @@ const PlayerTable = () => {
         </div>
         <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
           <p className="text-sm text-gray-600">
-            Showing {sortedPlayers.length} players
+            Showing {sortedPlayers.length} players • Click any row for detailed stats
           </p>
         </div>
       </div>
+
+      {/* Player Modal */}
+      {selectedPlayer && (
+        <PlayerModal 
+          player={selectedPlayer} 
+          teams={teams}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 };

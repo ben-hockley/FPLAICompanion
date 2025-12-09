@@ -1,26 +1,22 @@
 # FPL AI Companion
 
-A React application that displays Fantasy Premier League player data in an interactive, sortable table.
+A React + Vite app that displays Fantasy Premier League player data in an interactive, sortable table and provides detailed player modals.
 
 ## Features
 
-- **Live FPL Data**: Fetches real-time player statistics from the official FPL API
-- **Sortable Columns**: Click any column header to sort ascending/descending
-- **Scrollable Table**: Fixed header with scrollable body for easy navigation
-- **Responsive Design**: Clean, modern UI built with Tailwind CSS
-- **Loading & Error States**: Proper handling for data fetching states
-- **Color-Coded Positions**: Visual indicators for GK, DEF, MID, FWD
+- **Live FPL Data**: Fetches real-time player statistics from the official FPL API via a dev proxy.
+- **Sortable Columns**: Click any column header to sort ascending/descending.
+- **Scrollable Table**: Fixed header with scrollable body for easy navigation.
+- **Clickable Rows & Player Modal**: Click a player row to open a detailed modal with season stats, match history, and a recent form chart.
+- **Responsive UI**: Built with Tailwind CSS, responsive and mobile-friendly.
+- **Loading & Error States**: Shows loading spinners and retry options for both the main list and modal details.
 
-## Player Stats Displayed
+## What the Modal Shows
 
-- Player Name
-- Team
-- Position (GK/DEF/MID/FWD)
-- Price (£)
-- Total Points
-- Points per Game
-- Form
-- Selected by % of managers
+- **Header**: Player photo, full name, team, position, price, total points, and ICT index.
+- **Season Stats**: Form, points/game, minutes, bonus, goals, assists, clean sheets, goals conceded.
+- **Match History**: Scrollable table with Gameweek, Opponent (H/A), Points, Minutes, Goals, Assists, Clean Sheets, Bonus.
+- **Recent Form Chart**: Line chart for the last 5 games (uses `recharts`).
 
 ## Getting Started
 
@@ -33,59 +29,68 @@ A React application that displays Fantasy Premier League player data in an inter
 
 1. Clone the repository
 2. Install dependencies:
-   ```bash
-   npm install
-   ```
 
-### Running the Application
+```powershell
+npm install
+```
 
-Start the development server:
-```bash
+### Development Server
+
+Start the dev server:
+
+```powershell
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173/`
+Open `http://localhost:5173/` in your browser.
 
-### Building for Production
+Note: The app uses a Vite dev proxy so client requests to `/api/*` are forwarded to `https://fantasy.premierleague.com`. This avoids CORS during development. If you change `vite.config.js`, restart the dev server.
 
-Create a production build:
-```bash
+### Build & Preview
+
+```powershell
 npm run build
-```
-
-Preview the production build:
-```bash
 npm run preview
 ```
 
-## Tech Stack
+## Dependencies & Libraries
 
-- **React 18** - UI framework
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Styling
-- **FPL API** - Data source
+- **React 18**
+- **Vite**
+- **Tailwind CSS**
+- **Recharts** — used for the recent form chart inside the player modal
 
-## Project Structure
+## Project Structure (important files)
 
 ```
 FPLAICompanion/
 ├── src/
 │   ├── components/
-│   │   └── PlayerTable.jsx    # Main table component
-│   ├── App.jsx                 # Root component
-│   ├── main.jsx                # Entry point
-│   └── index.css               # Tailwind imports
+│   │   ├── PlayerTable.jsx    # Main table component (sortable, clickable rows)
+│   │   └── PlayerModal.jsx    # Modal that fetches and shows detailed player data
++│   ├── App.jsx                # Root component
+│   ├── main.jsx               # Entry point
+│   └── index.css              # Tailwind imports + small custom animations
 ├── index.html
 ├── package.json
-├── vite.config.js
+├── vite.config.js             # Includes `/api` dev proxy to FPL API
 └── tailwind.config.js
 ```
 
-## API Reference
+## API Endpoints Used
 
-This application uses the official Fantasy Premier League API:
-- Endpoint: `https://fantasy.premierleague.com/api/bootstrap-static/`
-- Returns: Player data, team data, and game statistics
+- Bootstrap data (players & teams): `/api/bootstrap-static/` (proxied to `https://fantasy.premierleague.com/api/bootstrap-static/`)
+- Player details (history): `/api/element-summary/{element_id}/` (proxied)
+
+## Usage
+
+- Click any row in the players table to open a modal with detailed stats and match history.
+- Close modal with the X button, by clicking outside the modal, or pressing `Escape`.
+
+## Troubleshooting
+
+- If the table shows "Failed to fetch" in the browser console, ensure you restarted the dev server after edits to `vite.config.js`.
+- If charts don't render, ensure `recharts` is installed: `npm install recharts`.
 
 ## License
 
