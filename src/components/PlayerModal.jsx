@@ -4,6 +4,7 @@ import StatusIcon from './StatusIcon';
 
 const PlayerModal = ({ player, teams, onClose }) => {
   const [playerDetails, setPlayerDetails] = useState(null);
+  const [fixtures, setFixtures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -34,14 +35,39 @@ const PlayerModal = ({ player, teams, onClose }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`/api/element-summary/${player.id}/`);
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch player details (${response.status})`);
+      // Fetch player details
+      const detailsResponse = await fetch(`/api/element-summary/${player.id}/`);
+      if (!detailsResponse.ok) {
+        throw new Error(`Failed to fetch player details (${detailsResponse.status})`);
       }
-
-      const data = await response.json();
-      setPlayerDetails(data);
+      const detailsData = await detailsResponse.json();
+      
+      // Fetch all fixtures
+      const fixturesResponse = await fetch('/api/fixtures/');
+      let fixturesData = [];
+      if (fixturesResponse.ok) {
+        fixturesData = await fixturesResponse.json();
+      }
+      
+      // Get upcoming fixtures for this player's team
+      const upcomingFixtures = fixturesData
+        .filter(f => !f.finished && (f.team_h === player.team || f.team_a === player.team))
+        .slice(0, 5)
+        .map(fixture => {
+          const isHome = fixture.team_h === player.team;
+          const opponentId = isHome ? fixture.team_a : fixture.team_h;
+          const difficulty = isHome ? fixture.team_h_difficulty : fixture.team_a_difficulty;
+          return {
+            opponent: teams[opponentId] || 'TBD',
+            isHome,
+            difficulty,
+            gameweek: fixture.event
+          };
+        });
+      
+      setPlayerDetails(detailsData);
+      setFixtures(upcomingFixtures);
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -226,6 +252,38 @@ const PlayerModal = ({ player, teams, onClose }) => {
               </div>
             </div>
           </div>
+
+          {/* Upcoming Fixtures */}
+          {fixtures.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Upcoming Fixtures</h3>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                {fixtures.map((fixture, index) => (
+                  <div key={index} className="bg-white border-2 border-gray-200 rounded-lg p-4 text-center">
+                    <div className="text-xs text-gray-500 mb-2">GW {fixture.gameweek}</div>
+                    <div className="font-semibold text-gray-900 mb-2">
+                      {fixture.isHome ? 'vs' : '@'} {fixture.opponent}
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-xs text-gray-600">Difficulty:</span>
+                      <span className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center text-white ${
+                        fixture.difficulty <= 2 ? 'bg-green-500' : 
+                        fixture.difficulty >= 4 ? 'bg-red-500' : 'bg-yellow-500'
+                      }`}>
+                        {fixture.difficulty}
+                      </span>
+                    </div>
+                    <div className={`text-xs mt-2 font-medium ${
+                      fixture.difficulty <= 2 ? 'text-green-600' : 
+                      fixture.difficulty >= 4 ? 'text-red-600' : 'text-yellow-600'
+                    }`}>
+                      {fixture.difficulty <= 2 ? 'Easy' : fixture.difficulty >= 4 ? 'Hard' : 'Medium'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Form Chart */}
           {formChartData.length > 0 && (
