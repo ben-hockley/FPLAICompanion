@@ -1,51 +1,26 @@
 import { useState, useEffect } from 'react';
 import PlayerModal from './PlayerModal';
 
-const PlayerTable = () => {
-  const [players, setPlayers] = useState([]);
-  const [teams, setTeams] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
+  const [players, setPlayers] = useState(initialPlayers || []);
+  const [teams, setTeams] = useState(initialTeams || {});
   const [sortConfig, setSortConfig] = useState({ key: 'total_points', direction: 'desc' });
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+
+  // Update state when props change
+  useEffect(() => {
+    if (initialPlayers) setPlayers(initialPlayers);
+  }, [initialPlayers]);
+
+  useEffect(() => {
+    if (initialTeams) setTeams(initialTeams);
+  }, [initialTeams]);
 
   const POSITION_MAP = {
     1: 'GK',
     2: 'DEF',
     3: 'MID',
     4: 'FWD'
-  };
-
-  useEffect(() => {
-    fetchFPLData();
-  }, []);
-
-  const fetchFPLData = async () => {
-    try {
-      setLoading(true);
-      // Use local dev proxy to avoid CORS issues. In dev the Vite proxy
-      // routes `/api` to https://fantasy.premierleague.com
-      const response = await fetch('/api/bootstrap-static/');
-      
-      if (!response.ok) {
-        throw new Error(`FPL API returned ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Create team map
-      const teamMap = {};
-      data.teams.forEach(team => {
-        teamMap[team.id] = team.name;
-      });
-      
-      setTeams(teamMap);
-      setPlayers(data.elements);
-      setLoading(false);
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
-    }
   };
 
   const handleSort = (key) => {
@@ -103,34 +78,6 @@ const PlayerTable = () => {
   const handleCloseModal = () => {
     setSelectedPlayer(null);
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-600">Loading FPL data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg">
-          <h2 className="text-xl font-bold mb-2">Error</h2>
-          <p>{error}</p>
-          <button 
-            onClick={fetchFPLData}
-            className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   const sortedPlayers = getSortedPlayers();
 
