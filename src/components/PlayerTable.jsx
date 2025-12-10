@@ -298,6 +298,7 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
         <PlayerModal 
           player={selectedPlayer} 
           teams={teams}
+          players={players}
           onClose={handleCloseModal}
         />
       )}

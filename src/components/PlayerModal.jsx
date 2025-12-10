@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import StatusIcon from './StatusIcon';
 
-const PlayerModal = ({ player, teams, onClose }) => {
+const PlayerModal = ({ player, teams, players = [], onClose }) => {
   const [playerDetails, setPlayerDetails] = useState(null);
   const [fixtures, setFixtures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showIctHelp, setShowIctHelp] = useState(false);
 
   const POSITION_MAP = {
     1: 'Goalkeeper',
@@ -458,8 +459,212 @@ const PlayerModal = ({ player, teams, onClose }) => {
               </div>
             </div>
           )}
+
+          {/* ICT Index Breakdown */}
+          {players.length > 0 && (
+            <div className="bg-white rounded-lg shadow-md p-6 text-center">
+              <h3 className="text-xl font-bold mb-4 text-gray-800 flex items-center justify-center gap-2">
+                ICT Index
+                <button
+                  type="button"
+                  onClick={() => setShowIctHelp(true)}
+                  className="text-blue-600 hover:text-blue-700 transition"
+                  title="What is ICT Index?"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Influence */}
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200 text-center">
+                  <h4 className="text-lg font-semibold text-purple-900 mb-2">Influence</h4>
+                  <div className="text-3xl font-bold text-purple-700 mb-2">{player.influence}</div>
+                  <div className="text-sm text-gray-700">
+                    <div className="mb-1">
+                      {' '}
+                      {player.influence_rank} out of {players.length} Players.
+                    </div>
+                    <div>
+                      {player.influence_rank_type} out of{' '}
+                      {players.filter(p => p.element_type === player.element_type).length} {' '}
+                      {POSITION_MAP[player.element_type]}s.
+                    </div>
+                  </div>
+                </div>
+
+                {/* Creativity */}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200 text-center">
+                  <h4 className="text-lg font-semibold text-blue-900 mb-2">Creativity</h4>
+                  <div className="text-3xl font-bold text-blue-700 mb-2">{player.creativity}</div>
+                  <div className="text-sm text-gray-700">
+                    <div className="mb-1">
+                      {player.creativity_rank} out of {players.length} Players.
+                    </div>
+                    <div>
+                      {player.creativity_rank_type} out of {' '}
+                      {players.filter(p => p.element_type === player.element_type).length} {' '}
+                      {POSITION_MAP[player.element_type]}s.
+                    </div>
+                  </div>
+                </div>
+
+                {/* Threat */}
+                <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200 text-center">
+                  <h4 className="text-lg font-semibold text-red-900 mb-2">Threat</h4>
+                  <div className="text-3xl font-bold text-red-700 mb-2">{player.threat}</div>
+                  <div className="text-sm text-gray-700">
+                    <div className="mb-1">
+                      {player.threat_rank} out of {players.length} Players.
+                    </div>
+                    <div>
+                      {player.threat_rank_type} out of{' '}
+                      {players.filter(p => p.element_type === player.element_type).length} {' '}
+                      {POSITION_MAP[player.element_type]}s.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* ICT Index Help Modal */}
+      {showIctHelp && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4 animate-fadeIn"
+          onClick={() => setShowIctHelp(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slideUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-t-lg">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">What is ICT Index?</h2>
+                <button
+                  onClick={() => setShowIctHelp(false)}
+                  className="text-white hover:text-gray-200 text-3xl leading-none transition"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-l-4 border-indigo-600 p-5 rounded-r">
+                <h3 className="font-bold text-indigo-900 text-lg mb-2">ICT Index Overview</h3>
+                <p className="text-indigo-800">
+                  The <strong>ICT Index</strong> is a statistical metric that combines three key performance indicators to help FPL managers identify the most impactful players. It provides a comprehensive view of a player's offensive contribution beyond just goals and assists.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-purple-50 border-l-4 border-purple-600 p-4 rounded-r">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold flex-shrink-0">
+                      I
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-purple-900 text-lg mb-2">Influence</h4>
+                      <p className="text-purple-800 text-sm mb-2">
+                        Measures a player's impact on a match, taking into account actions that could directly or indirectly affect the outcome.
+                      </p>
+                      <ul className="text-purple-700 text-sm space-y-1 ml-4 list-disc">
+                        <li>Big chances created</li>
+                        <li>Successful passes in the final third</li>
+                        <li>Shots on target</li>
+                        <li>Defensive actions (clearances, blocks, interceptions)</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold flex-shrink-0">
+                      C
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-blue-900 text-lg mb-2">Creativity</h4>
+                      <p className="text-blue-800 text-sm mb-2">
+                        Assesses a player's ability to create goal-scoring opportunities for teammates.
+                      </p>
+                      <ul className="text-blue-700 text-sm space-y-1 ml-4 list-disc">
+                        <li>Key passes and assists</li>
+                        <li>Successful crosses and corners</li>
+                        <li>Through balls</li>
+                        <li>Passes leading to shots</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-r">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold flex-shrink-0">
+                      T
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-red-900 text-lg mb-2">Threat</h4>
+                      <p className="text-red-800 text-sm mb-2">
+                        Evaluates a player's potential to score goals based on their attacking actions.
+                      </p>
+                      <ul className="text-red-700 text-sm space-y-1 ml-4 list-disc">
+                        <li>Shots on goal</li>
+                        <li>Touches in the opposition box</li>
+                        <li>Big chances (high xG opportunities)</li>
+                        <li>Attacking positioning</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-green-50 border border-green-400 rounded-lg p-4">
+                <div className="flex gap-3">
+                  <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <h4 className="font-semibold text-green-900 mb-2">How FPL Managers Can Use ICT Index</h4>
+                    <ul className="text-sm text-green-800 space-y-2">
+                      <li><strong>Identify Hidden Gems:</strong> Players with high ICT scores but low ownership can be excellent differential picks</li>
+                      <li><strong>Predict Future Returns:</strong> High ICT scores often precede goals and assists, helping you transfer players in before price rises</li>
+                      <li><strong>Compare Players:</strong> When choosing between two similarly-priced players, ICT Index provides objective data</li>
+                      <li><strong>Position-Specific Analysis:</strong> Compare players within their position group to find the best value picks</li>
+                      <li><strong>Form Tracking:</strong> Consistent ICT performers are more reliable captain choices and long-term holds</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-400 rounded-lg p-4">
+                <div className="flex gap-3">
+                  <svg className="w-6 h-6 text-yellow-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <h4 className="font-semibold text-yellow-900">Pro Tip</h4>
+                    <p className="text-sm text-yellow-800">Combine ICT Index with fixture difficulty and form to make the most informed transfer decisions. A player with excellent ICT stats facing easy fixtures is often a must-have!</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowIctHelp(false)}
+                  className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition font-medium shadow-md"
+                >
+                  Got it!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

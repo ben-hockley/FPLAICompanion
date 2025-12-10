@@ -410,7 +410,7 @@ const TeamFormation = ({ allPlayers, teams }) => {
       )}
       
       {selectedPlayer && (
-        <PlayerModal player={selectedPlayer} teams={teams} onClose={handleCloseModal} />
+        <PlayerModal player={selectedPlayer} teams={teams} players={allPlayers} onClose={handleCloseModal} />
       )}
 
       {/* Transfer Recommendations Modal */}
