@@ -3,6 +3,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import StatusIcon from './StatusIcon';
 import { getCountryCode } from '../utils/regionFlags';
 import * as flags from 'country-flag-icons/react/3x2';
+
+// Custom SVG UK Flags.
 import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
 
 const PlayerModal = ({ player, teams, players = [], onClose }) => {
@@ -12,6 +14,7 @@ const PlayerModal = ({ player, teams, players = [], onClose }) => {
   const [error, setError] = useState(null);
   const [showIctHelp, setShowIctHelp] = useState(false);
 
+  // Map element-type (FPL API) to position name.
   const POSITION_MAP = {
     1: 'Goalkeeper',
     2: 'Defender',
@@ -80,6 +83,7 @@ const PlayerModal = ({ player, teams, players = [], onClose }) => {
   };
 
   const getPhotoUrl = (code) => {
+    // Updated URL format for 25/26 Premier League player pictures.
     return `https://resources.premierleague.com/premierleague25/photos/players/110x140/${code}.png`;
   };
 
