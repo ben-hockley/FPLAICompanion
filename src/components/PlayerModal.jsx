@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import StatusIcon from './StatusIcon';
+import { getCountryCode } from '../utils/regionFlags';
+import * as flags from 'country-flag-icons/react/3x2';
+import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
 
 const PlayerModal = ({ player, teams, players = [], onClose }) => {
   const [playerDetails, setPlayerDetails] = useState(null);
@@ -180,6 +183,26 @@ const PlayerModal = ({ player, teams, players = [], onClose }) => {
             
             <div className="flex-1">
               <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
+                {(() => {
+                  const countryCode = getCountryCode(player.region);
+                  if (countryCode) {
+                    // Handle UK countries with custom flags
+                    if (countryCode === 'ENG') {
+                      return <EnglandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+                    } else if (countryCode === 'SCT') {
+                      return <ScotlandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+                    } else if (countryCode === 'WLS') {
+                      return <WalesFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+                    } else if (countryCode === 'NIR') {
+                      return <NorthernIrelandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+                    } else {
+                      // Use country-flag-icons for other countries
+                      const FlagComponent = flags[countryCode];
+                      return FlagComponent ? <FlagComponent className="w-6 h-4 inline-block rounded shadow-sm" title={countryCode} /> : null;
+                    }
+                  }
+                  return null;
+                })()}
                 {player.first_name} {player.second_name}
                 <StatusIcon status={player.status} className="w-5 h-5 text-xs" />
               </h2>
