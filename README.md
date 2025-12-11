@@ -66,7 +66,7 @@ npm run preview
 
 ## Dependencies & Libraries
 
-- **React 18**
+- **React**
 - **Vite**
 - **Tailwind CSS**
 - **Recharts** — used for the recent form chart inside the player modal
@@ -104,9 +104,7 @@ FPLAICompanion/
 
 ## Troubleshooting
 
-- If the table shows "Failed to fetch" in the browser console, ensure you restarted the dev server after edits to `vite.config.js`.
-- If charts don't render, ensure `recharts` is installed: `npm install recharts`.
 
 ## License
 
-MIT
+IN PROGRESS
