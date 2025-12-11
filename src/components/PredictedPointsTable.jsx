@@ -275,6 +275,7 @@ class FPLPredictor {
 
 // React Component
 import { useState, useEffect } from 'react';
+import PlayerModal from './PlayerModal';
 
 export default function PredictedPointsTable() {
     const [allPlayers, setAllPlayers] = useState([]);
@@ -282,6 +283,9 @@ export default function PredictedPointsTable() {
     const [error, setError] = useState(null);
     const [gameweek, setGameweek] = useState(null);
     const [sortConfig, setSortConfig] = useState({ key: 'predicted_points', direction: 'desc' });
+    const [selectedPlayer, setSelectedPlayer] = useState(null);
+    const [fullPlayersData, setFullPlayersData] = useState([]);
+    const [teams, setTeams] = useState({});
 
     const POSITION_MAP = {
         'GK': 1,
@@ -294,6 +298,20 @@ export default function PredictedPointsTable() {
         async function fetchPredictions() {
             try {
                 setLoading(true);
+                
+                // Fetch full player data for modal
+                const response = await fetch('/api/bootstrap-static/');
+                const data = await response.json();
+                
+                // Create team map
+                const teamMap = {};
+                data.teams.forEach(team => {
+                    teamMap[team.id] = team.name;
+                });
+                setTeams(teamMap);
+                setFullPlayersData(data.elements);
+                
+                // Generate predictions
                 const predictor = new FPLPredictor();
                 await predictor.init();
                 const rankings = await predictor.generatePredictions();
@@ -356,6 +374,18 @@ export default function PredictedPointsTable() {
         return sortConfig.direction === 'asc' ? 
             <span className="ml-1">↑</span> : 
             <span className="ml-1">↓</span>;
+    };
+
+    const handlePlayerClick = (predictedPlayer) => {
+        // Find the full player data by ID
+        const fullPlayer = fullPlayersData.find(p => p.id === predictedPlayer.id);
+        if (fullPlayer) {
+            setSelectedPlayer(fullPlayer);
+        }
+    };
+
+    const handleCloseModal = () => {
+        setSelectedPlayer(null);
     };
 
     if (loading) {
@@ -440,7 +470,11 @@ export default function PredictedPointsTable() {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {sortedPlayers.map((player, index) => (
-                                <tr key={player.id} className="hover:bg-blue-50 transition-colors">
+                                <tr 
+                                    key={player.id} 
+                                    onClick={() => handlePlayerClick(player)}
+                                    className="hover:bg-blue-50 transition-colors cursor-pointer"
+                                >
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {index + 1}
                                     </td>
@@ -485,10 +519,20 @@ export default function PredictedPointsTable() {
                 </div>
                 <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex-shrink-0">
                     <p className="text-sm text-gray-600">
-                        Showing {sortedPlayers.length} players with predictions
+                        Showing {sortedPlayers.length} players with predictions • Click any row for detailed stats
                     </p>
                 </div>
             </div>
+
+            {/* Player Modal */}
+            {selectedPlayer && (
+                <PlayerModal 
+                    player={selectedPlayer} 
+                    teams={teams}
+                    players={fullPlayersData}
+                    onClose={handleCloseModal}
+                />
+            )}
         </div>
     );
 }
