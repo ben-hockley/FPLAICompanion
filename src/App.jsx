@@ -93,7 +93,6 @@ function App() {
 
         {/* Predicted Points Section - Full Width Below */}
         <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">AI Predictions</h2>
           <PredictedPointsTable />
         </div>
       </div>

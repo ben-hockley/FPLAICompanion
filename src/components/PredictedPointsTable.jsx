@@ -277,11 +277,18 @@ class FPLPredictor {
 import { useState, useEffect } from 'react';
 
 export default function PredictedPointsTable() {
-    const [topPlayers, setTopPlayers] = useState([]);
-    const [valuePicks, setValuePicks] = useState([]);
+    const [allPlayers, setAllPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [gameweek, setGameweek] = useState(null);
+    const [sortConfig, setSortConfig] = useState({ key: 'predicted_points', direction: 'desc' });
+
+    const POSITION_MAP = {
+        'GK': 1,
+        'DEF': 2,
+        'MID': 3,
+        'FWD': 4
+    };
 
     useEffect(() => {
         async function fetchPredictions() {
@@ -292,14 +299,7 @@ export default function PredictedPointsTable() {
                 const rankings = await predictor.generatePredictions();
 
                 setGameweek(predictor.nextGwId);
-                setTopPlayers(rankings.slice(0, 20));
-
-                // Top 20 Value Picks (ROI) - Filter out bench fodder
-                const valuePicks = rankings
-                    .filter(p => p.predicted_points > 1.5 && p.cost > 3.9)
-                    .sort((a, b) => b.roi - a.roi);
-
-                setValuePicks(valuePicks.slice(0, 20));
+                setAllPlayers(rankings); // Store all players
                 setLoading(false);
             } catch (err) {
                 setError(err.message);
@@ -309,6 +309,54 @@ export default function PredictedPointsTable() {
 
         fetchPredictions();
     }, []);
+
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const getSortedPlayers = () => {
+        const sortedPlayers = [...allPlayers];
+        
+        sortedPlayers.sort((a, b) => {
+            let aValue = a[sortConfig.key];
+            let bValue = b[sortConfig.key];
+
+            // Special handling for different data types
+            if (sortConfig.key === 'name' || sortConfig.key === 'team') {
+                aValue = aValue.toLowerCase();
+                bValue = bValue.toLowerCase();
+            } else if (sortConfig.key === 'position') {
+                aValue = POSITION_MAP[a.position];
+                bValue = POSITION_MAP[b.position];
+            } else {
+                aValue = parseFloat(aValue) || 0;
+                bValue = parseFloat(bValue) || 0;
+            }
+
+            if (aValue < bValue) {
+                return sortConfig.direction === 'asc' ? -1 : 1;
+            }
+            if (aValue > bValue) {
+                return sortConfig.direction === 'asc' ? 1 : -1;
+            }
+            return 0;
+        });
+
+        return sortedPlayers;
+    };
+
+    const getSortIndicator = (columnKey) => {
+        if (sortConfig.key !== columnKey) {
+            return <span className="ml-1 text-blue-200">⇅</span>;
+        }
+        return sortConfig.direction === 'asc' ? 
+            <span className="ml-1">↑</span> : 
+            <span className="ml-1">↓</span>;
+    };
 
     if (loading) {
         return (
@@ -328,60 +376,119 @@ export default function PredictedPointsTable() {
         );
     }
 
-    const TableComponent = ({ title, data }) => (
-        <div className="mb-8">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">{title}</h3>
-            <div className="overflow-x-auto">
-                <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">Rank</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">Player</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">Team</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">Pos</th>
-                            <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider border-b">Cost</th>
-                            <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-b">Fixtures</th>
-                            <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider border-b">Pred Pts</th>
-                            <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider border-b">ROI</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {data.map((player, index) => (
-                            <tr key={player.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
-                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{player.name}</td>
-                                <td className="px-4 py-3 text-sm text-gray-600">{player.team}</td>
-                                <td className="px-4 py-3 text-sm text-gray-600">{player.position}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900 text-right">£{player.cost.toFixed(1)}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900 text-center">
-                                    {player.fixtures > 1 && (
-                                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
-                                            DGW ({player.fixtures})
-                                        </span>
-                                    )}
-                                    {player.fixtures === 1 && player.fixtures}
-                                    {player.fixtures === 0 && <span className="text-red-500">BGW</span>}
-                                </td>
-                                <td className="px-4 py-3 text-sm font-semibold text-gray-900 text-right">{player.predicted_points}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900 text-right">{player.roi}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
+    const sortedPlayers = getSortedPlayers();
 
     return (
-        <div>
-            <TableComponent 
-                title={`Top 20 Predicted Players for GW ${gameweek}`}
-                data={topPlayers}
-            />
-            <TableComponent 
-                title="Top 20 Value Picks (ROI)"
-                data={valuePicks}
-            />
+        <div className="flex flex-col h-[600px]">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-gray-800">
+                    AI Predicted Points for GW {gameweek}
+                </h2>
+            </div>
+
+            <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-blue-600 text-white sticky top-0">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                                    Rank
+                                </th>
+                                <th 
+                                    onClick={() => handleSort('name')}
+                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    Player {getSortIndicator('name')}
+                                </th>
+                                <th 
+                                    onClick={() => handleSort('team')}
+                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    Team {getSortIndicator('team')}
+                                </th>
+                                <th 
+                                    onClick={() => handleSort('position')}
+                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    Position {getSortIndicator('position')}
+                                </th>
+                                <th 
+                                    onClick={() => handleSort('cost')}
+                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    Cost {getSortIndicator('cost')}
+                                </th>
+                                <th 
+                                    onClick={() => handleSort('fixtures')}
+                                    className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    Fixtures {getSortIndicator('fixtures')}
+                                </th>
+                                <th 
+                                    onClick={() => handleSort('predicted_points')}
+                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    Predicted Pts {getSortIndicator('predicted_points')}
+                                </th>
+                                <th 
+                                    onClick={() => handleSort('roi')}
+                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    ROI {getSortIndicator('roi')}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {sortedPlayers.map((player, index) => (
+                                <tr key={player.id} className="hover:bg-blue-50 transition-colors">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {index + 1}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {player.name}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        {player.team}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        <span className={`px-2 py-1 rounded text-xs font-semibold
+                                            ${player.position === 'GK' ? 'bg-yellow-200 text-yellow-800' : ''}
+                                            ${player.position === 'DEF' ? 'bg-green-200 text-green-800' : ''}
+                                            ${player.position === 'MID' ? 'bg-blue-200 text-blue-800' : ''}
+                                            ${player.position === 'FWD' ? 'bg-red-200 text-red-800' : ''}
+                                        `}>
+                                            {player.position}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        £{player.cost.toFixed(1)}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                        {player.fixtures > 1 && (
+                                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                                DGW ({player.fixtures})
+                                            </span>
+                                        )}
+                                        {player.fixtures === 1 && player.fixtures}
+                                        {player.fixtures === 0 && <span className="text-red-500">BGW</span>}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                        {player.predicted_points}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        {player.roi}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex-shrink-0">
+                    <p className="text-sm text-gray-600">
+                        Showing {sortedPlayers.length} players with predictions
+                    </p>
+                </div>
+            </div>
         </div>
     );
 }
