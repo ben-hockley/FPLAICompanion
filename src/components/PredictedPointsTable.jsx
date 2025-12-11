@@ -148,6 +148,9 @@ class FPLPredictor {
             // --- PREDICTION LOGIC ---
 
             let totalImpliedPoints = 0;
+            let totalGoalProb = 0;
+            let totalAssistProb = 0;
+            let totalCleanSheetProb = 0;
 
             // Loop through fixtures (handles Double Gameweeks automatically)
             for (let i = 0; i < upcoming.length; i++) {
@@ -192,6 +195,11 @@ class FPLPredictor {
                 const goalProb = impliedTeamGoals * (ewmaStats.threat * THREAT_SCALAR);
                 const assistProb = impliedTeamGoals * (ewmaStats.creativity * THREAT_SCALAR * 0.6);
 
+                // Accumulate probabilities across fixtures
+                totalGoalProb += goalProb;
+                totalAssistProb += assistProb;
+                totalCleanSheetProb += cleanSheetProb;
+
                 // Apply Position Modifiers
                 if (positionId === 4) { // Forward
                     matchPoints += (goalProb * 4) + (assistProb * 3);
@@ -209,7 +217,7 @@ class FPLPredictor {
             // Final Calculation
             const finalPrediction = totalImpliedPoints * nailednessCoeff;
 
-            return this.formatOutput(player, finalPrediction, upcoming.length);
+            return this.formatOutput(player, finalPrediction, upcoming.length, nailednessCoeff, totalGoalProb, totalAssistProb, totalCleanSheetProb);
 
         } catch (error) {
             return null; // Fail silently for individual player errors
@@ -257,16 +265,21 @@ class FPLPredictor {
         return avgMin * (chance / 100);
     }
 
-    formatOutput(player, points, fixtures) {
+    formatOutput(player, points, fixtures, nailednessCoeff, goalProb, assistProb, cleanSheetProb) {
         const cost = player.now_cost / 10;
         const pPoints = parseFloat(points.toFixed(2));
+        const positionId = player.element_type;
         return {
             id: player.id,
             name: player.web_name,
             team: this.teamStrength[player.team].name,
-            position: player.element_type === 1? 'GK' : player.element_type === 2? 'DEF' : player.element_type === 3? 'MID' : 'FWD',
+            position: positionId === 1? 'GK' : positionId === 2? 'DEF' : positionId === 3? 'MID' : 'FWD',
             cost: cost,
             fixtures: fixtures,
+            nailedness: parseFloat((nailednessCoeff || 0).toFixed(2)),
+            goal_prob: parseFloat((goalProb || 0).toFixed(2)),
+            assist_prob: parseFloat((assistProb || 0).toFixed(2)),
+            clean_sheet_prob: positionId === 4 ? null : parseFloat((cleanSheetProb || 0).toFixed(2)), // null for forwards
             predicted_points: pPoints,
             roi: parseFloat((pPoints / cost).toFixed(2)) // Points per Million
         };
@@ -292,6 +305,11 @@ export default function PredictedPointsTable() {
         'DEF': 2,
         'MID': 3,
         'FWD': 4
+    };
+
+    const formatPercentage = (value) => {
+        if (value === null) return '-';
+        return `${(value * 100).toFixed(0)}%`;
     };
 
     useEffect(() => {
@@ -455,6 +473,30 @@ export default function PredictedPointsTable() {
                                     Fixtures {getSortIndicator('fixtures')}
                                 </th>
                                 <th 
+                                    onClick={() => handleSort('nailedness')}
+                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    Nailedness {getSortIndicator('nailedness')}
+                                </th>
+                                <th 
+                                    onClick={() => handleSort('goal_prob')}
+                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    Goal % {getSortIndicator('goal_prob')}
+                                </th>
+                                <th 
+                                    onClick={() => handleSort('assist_prob')}
+                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    Assist % {getSortIndicator('assist_prob')}
+                                </th>
+                                <th 
+                                    onClick={() => handleSort('clean_sheet_prob')}
+                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                >
+                                    CS % {getSortIndicator('clean_sheet_prob')}
+                                </th>
+                                <th 
                                     onClick={() => handleSort('predicted_points')}
                                     className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
@@ -505,6 +547,18 @@ export default function PredictedPointsTable() {
                                         )}
                                         {player.fixtures === 1 && player.fixtures}
                                         {player.fixtures === 0 && <span className="text-red-500">BGW</span>}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        {player.nailedness}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        {formatPercentage(player.goal_prob)}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        {formatPercentage(player.assist_prob)}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        {formatPercentage(player.clean_sheet_prob)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                                         {player.predicted_points}
