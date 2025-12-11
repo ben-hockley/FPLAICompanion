@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import PlayerTable from './components/PlayerTable'
 import TeamFormation from './components/TeamFormation'
+import PredictedPointsTable from './components/PredictedPointsTable'
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -88,6 +89,12 @@ function App() {
               <PlayerTable players={players} teams={teams} />
             </div>
           </div>
+        </div>
+
+        {/* Predicted Points Section - Full Width Below */}
+        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">AI Predictions</h2>
+          <PredictedPointsTable />
         </div>
       </div>
     </div>

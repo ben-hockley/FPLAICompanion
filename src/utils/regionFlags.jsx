@@ -70,7 +70,7 @@ export const REGION_TO_COUNTRY_CODE = {
 /**
  * Get the country code for a region code
  * @param {number} regionCode - The FPL region code
- * @returns {string|null} ISO country code or null if not found
+ * @returns {string|null} FPL Region code or null if not found
  */
 export const getCountryCode = (regionCode) => {
   return REGION_TO_COUNTRY_CODE[regionCode] || null;
