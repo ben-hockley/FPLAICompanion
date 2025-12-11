@@ -290,7 +290,7 @@ class FPLPredictor {
 import { useState, useEffect } from 'react';
 import PlayerModal from './PlayerModal';
 
-export default function PredictedPointsTable() {
+export default function PredictedPointsTable({ myTeamPlayerIds = [] }) {
     const [allPlayers, setAllPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -299,6 +299,7 @@ export default function PredictedPointsTable() {
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [fullPlayersData, setFullPlayersData] = useState([]);
     const [teams, setTeams] = useState({});
+    const [showMyTeamOnly, setShowMyTeamOnly] = useState(false);
 
     const POSITION_MAP = {
         'GK': 1,
@@ -355,7 +356,13 @@ export default function PredictedPointsTable() {
     };
 
     const getSortedPlayers = () => {
-        const sortedPlayers = [...allPlayers];
+        // Filter by my team if checkbox is checked
+        let filteredPlayers = allPlayers;
+        if (showMyTeamOnly && myTeamPlayerIds.length > 0) {
+            filteredPlayers = allPlayers.filter(p => myTeamPlayerIds.includes(p.id));
+        }
+        
+        const sortedPlayers = [...filteredPlayers];
         
         sortedPlayers.sort((a, b) => {
             let aValue = a[sortConfig.key];
@@ -432,6 +439,19 @@ export default function PredictedPointsTable() {
                 <h2 className="text-2xl font-bold text-gray-800">
                     AI Predicted Points for GW {gameweek}
                 </h2>
+                {myTeamPlayerIds.length > 0 && (
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={showMyTeamOnly}
+                            onChange={(e) => setShowMyTeamOnly(e.target.checked)}
+                            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                            Show only my team
+                        </span>
+                    </label>
+                )}
             </div>
 
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -511,11 +531,15 @@ export default function PredictedPointsTable() {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {sortedPlayers.map((player, index) => (
+                            {sortedPlayers.map((player, index) => {
+                                const isInMyTeam = myTeamPlayerIds.includes(player.id);
+                                return (
                                 <tr 
                                     key={player.id} 
                                     onClick={() => handlePlayerClick(player)}
-                                    className="hover:bg-blue-50 transition-colors cursor-pointer"
+                                    className={`hover:bg-blue-50 transition-colors cursor-pointer ${
+                                        isInMyTeam ? 'bg-blue-100' : ''
+                                    }`}
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {index + 1}
@@ -567,7 +591,8 @@ export default function PredictedPointsTable() {
                                         {player.roi}
                                     </td>
                                 </tr>
-                            ))}
+                            );
+                            })}
                         </tbody>
                     </table>
                 </div>

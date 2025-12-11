@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const FilterModal = ({ isOpen, onClose, onApplyFilters, currentFilters, teams }) => {
+const FilterModal = ({ isOpen, onClose, onApplyFilters, currentFilters, teams, hasMyTeam = false }) => {
   const [filters, setFilters] = useState({
     playerName: '',
     team: '',
@@ -12,7 +12,8 @@ const FilterModal = ({ isOpen, onClose, onApplyFilters, currentFilters, teams })
     minPPG: '',
     maxPPG: '',
     minForm: '',
-    maxForm: ''
+    maxForm: '',
+    inMyTeam: false
   });
 
   useEffect(() => {
@@ -49,7 +50,8 @@ const FilterModal = ({ isOpen, onClose, onApplyFilters, currentFilters, teams })
       minPPG: '',
       maxPPG: '',
       minForm: '',
-      maxForm: ''
+      maxForm: '',
+      inMyTeam: false
     };
     setFilters(emptyFilters);
     onApplyFilters(emptyFilters);
@@ -120,6 +122,23 @@ const FilterModal = ({ isOpen, onClose, onApplyFilters, currentFilters, teams })
               <option value="4">Forward (FWD)</option>
             </select>
           </div>
+
+          {/* In My Team Filter */}
+          {hasMyTeam && (
+            <div>
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters.inMyTeam}
+                  onChange={(e) => handleChange('inMyTeam', e.target.checked)}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Show only players in my team
+                </span>
+              </label>
+            </div>
+          )}
 
           {/* Price Range */}
           <div>

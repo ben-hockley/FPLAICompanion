@@ -3,7 +3,7 @@ import PlayerModal from './PlayerModal';
 import StatusIcon from './StatusIcon';
 import TransferRecommendations from './TransferRecommendations';
 
-const TeamFormation = ({ allPlayers, teams }) => {
+const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
   const [managerId, setManagerId] = useState('');
   const [teamData, setTeamData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -74,12 +74,19 @@ const TeamFormation = ({ allPlayers, teams }) => {
         };
       }));
 
-      setTeamData({
+      const teamDataObj = {
         ...data,
         picks: enrichedPicks
-      });
+      };
+      setTeamData(teamDataObj);
       setCurrentGameweek(gameweek);
       setLoading(false);
+      
+      // Notify parent of loaded team player IDs
+      if (onTeamLoaded) {
+        const playerIds = enrichedPicks.map(pick => pick.element);
+        onTeamLoaded(playerIds);
+      }
     } catch (err) {
       setError(err.message);
       setLoading(false);

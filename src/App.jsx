@@ -8,6 +8,7 @@ function App() {
   const [teams, setTeams] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [myTeamPlayerIds, setMyTeamPlayerIds] = useState([]);
 
   useEffect(() => {
     fetchFPLData();
@@ -37,6 +38,10 @@ function App() {
       setError(err.message);
       setLoading(false);
     }
+  };
+
+  const handleTeamLoaded = (playerIds) => {
+    setMyTeamPlayerIds(playerIds);
   };
 
   if (loading) {
@@ -79,21 +84,29 @@ function App() {
           {/* Left Box: My Team Formation */}
           <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col w-full max-h-[calc(100vh-8rem)]">
             <div className="flex-1 min-h-0 overflow-auto">
-              <TeamFormation allPlayers={players} teams={teams} />
+              <TeamFormation 
+                allPlayers={players} 
+                teams={teams} 
+                onTeamLoaded={handleTeamLoaded}
+              />
             </div>
           </div>
 
           {/* Right Box: Player Stats Table */}
           <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col w-full max-h-[calc(100vh-8rem)]">
             <div className="flex-1 min-h-0 overflow-auto">
-              <PlayerTable players={players} teams={teams} />
+              <PlayerTable 
+                players={players} 
+                teams={teams} 
+                myTeamPlayerIds={myTeamPlayerIds}
+              />
             </div>
           </div>
         </div>
 
         {/* Predicted Points Section - Full Width Below */}
         <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <PredictedPointsTable />
+          <PredictedPointsTable myTeamPlayerIds={myTeamPlayerIds} />
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import PlayerModal from './PlayerModal';
 import FilterModal from './FilterModal';
 import StatusIcon from './StatusIcon';
 
-const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
+const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlayerIds = [] }) => {
   const [players, setPlayers] = useState(initialPlayers || []);
   const [teams, setTeams] = useState(initialTeams || {});
   const [sortConfig, setSortConfig] = useState({ key: 'total_points', direction: 'desc' });
@@ -20,7 +20,8 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
     minPPG: '',
     maxPPG: '',
     minForm: '',
-    maxForm: ''
+    maxForm: '',
+    inMyTeam: false
   });
 
   // Update state when props change
@@ -96,6 +97,11 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
         return false;
       }
       if (filters.maxForm && form > parseFloat(filters.maxForm)) {
+        return false;
+      }
+
+      // My team filter
+      if (filters.inMyTeam && !myTeamPlayerIds.includes(player.id)) {
         return false;
       }
 
@@ -241,11 +247,15 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {sortedPlayers.map((player) => (
+              {sortedPlayers.map((player) => {
+                const isInMyTeam = myTeamPlayerIds.includes(player.id);
+                return (
                 <tr 
                   key={player.id}
                   onClick={() => handlePlayerClick(player)}
-                  className="hover:bg-blue-50 transition-colors cursor-pointer"
+                  className={`hover:bg-blue-50 transition-colors cursor-pointer ${
+                    isInMyTeam ? 'bg-blue-100' : ''
+                  }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <div className="flex items-center gap-2">
@@ -282,7 +292,8 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
                     {player.selected_by_percent}%
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         </div>
@@ -310,6 +321,7 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams }) => {
         onApplyFilters={handleApplyFilters}
         currentFilters={filters}
         teams={teams}
+        hasMyTeam={myTeamPlayerIds.length > 0}
       />
     </>
   );
