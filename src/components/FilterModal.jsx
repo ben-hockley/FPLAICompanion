@@ -13,7 +13,10 @@ const FilterModal = ({ isOpen, onClose, onApplyFilters, currentFilters, teams, h
     maxPPG: '',
     minForm: '',
     maxForm: '',
-    inMyTeam: false
+    inMyTeam: false,
+    penaltyTaker: false,
+    freeKickTaker: false,
+    cornerTaker: false
   });
 
   useEffect(() => {
@@ -51,7 +54,10 @@ const FilterModal = ({ isOpen, onClose, onApplyFilters, currentFilters, teams, h
       maxPPG: '',
       minForm: '',
       maxForm: '',
-      inMyTeam: false
+      inMyTeam: false,
+      penaltyTaker: false,
+      freeKickTaker: false,
+      cornerTaker: false
     };
     setFilters(emptyFilters);
     onApplyFilters(emptyFilters);
@@ -139,6 +145,48 @@ const FilterModal = ({ isOpen, onClose, onApplyFilters, currentFilters, teams, h
               </label>
             </div>
           )}
+
+          {/* Set Piece Takers */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Set Piece Takers
+            </label>
+            <div className="space-y-2">
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters.penaltyTaker}
+                  onChange={(e) => handleChange('penaltyTaker', e.target.checked)}
+                  className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-500"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Penalty Takers
+                </span>
+              </label>
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters.freeKickTaker}
+                  onChange={(e) => handleChange('freeKickTaker', e.target.checked)}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Direct Free Kick Takers
+                </span>
+              </label>
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters.cornerTaker}
+                  onChange={(e) => handleChange('cornerTaker', e.target.checked)}
+                  className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Corner & Indirect Free Kick Takers
+                </span>
+              </label>
+            </div>
+          </div>
 
           {/* Price Range */}
           <div>

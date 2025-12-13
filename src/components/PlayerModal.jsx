@@ -290,8 +290,8 @@ const PlayerModal = ({ player, teams, players = [], onClose }) => {
                 <div className="text-2xl font-bold text-gray-800">{player.clean_sheets}</div>
               </div>
               )}
-              {/* Goals conceded shown for GK and DEF */
-              player.element_type <= 2 && (
+              {/* Goals conceded shown for GK*/
+              player.element_type === 1 && (
               <div className="bg-orange-50 p-4 rounded-lg" title="Average goals conceded per match this season, -1 point per goal conceded for GK and DEF" aria-label="Goals Conceded per match">
                 <div className="text-sm text-gray-600">Goals Conceded/Match</div>
                 <div className="text-2xl font-bold text-gray-800">{player.goals_conceded_per_90}</div>
@@ -313,6 +313,63 @@ const PlayerModal = ({ player, teams, players = [], onClose }) => {
               )}
             </div>
           </div>
+
+          {/* Set Piece Taking Order */}
+          {(player.penalties_order > 0 || player.direct_freekicks_order > 0 || player.corners_and_indirect_freekicks_order > 0) && (
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Set Pieces</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {player.penalties_order > 0 && (
+                  <div className="bg-purple-50 border-2 border-purple-200 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-purple-600 rounded-full">
+                        P
+                      </span>
+                      <div className="text-sm font-semibold text-gray-700">Penalties</div>
+                    </div>
+                    <div className="text-3xl font-bold text-purple-600">
+                      #{player.penalties_order}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {player.penalties_order === 1 ? 'Primary taker' : `${player.penalties_order}${player.penalties_order === 2 ? 'nd' : player.penalties_order === 3 ? 'rd' : 'th'} choice`}
+                    </div>
+                  </div>
+                )}
+                {player.direct_freekicks_order > 0 && (
+                  <div className="bg-blue-50 border-2 border-blue-200 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-blue-600 rounded-full">
+                        F
+                      </span>
+                      <div className="text-sm font-semibold text-gray-700">Direct Free Kicks</div>
+                    </div>
+                    <div className="text-3xl font-bold text-blue-600">
+                      #{player.direct_freekicks_order}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {player.direct_freekicks_order === 1 ? 'Primary taker' : `${player.direct_freekicks_order}${player.direct_freekicks_order === 2 ? 'nd' : player.direct_freekicks_order === 3 ? 'rd' : 'th'} choice`}
+                    </div>
+                  </div>
+                )}
+                {player.corners_and_indirect_freekicks_order > 0 && (
+                  <div className="bg-green-50 border-2 border-green-200 p-4 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-green-600 rounded-full">
+                        C
+                      </span>
+                      <div className="text-sm font-semibold text-gray-700">Corners & Indirect FKs</div>
+                    </div>
+                    <div className="text-3xl font-bold text-green-600">
+                      #{player.corners_and_indirect_freekicks_order}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {player.corners_and_indirect_freekicks_order === 1 ? 'Primary taker' : `${player.corners_and_indirect_freekicks_order}${player.corners_and_indirect_freekicks_order === 2 ? 'nd' : player.corners_and_indirect_freekicks_order === 3 ? 'rd' : 'th'} choice`}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Upcoming Fixtures */}
           {fixtures.length > 0 && (

@@ -21,7 +21,10 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
     maxPPG: '',
     minForm: '',
     maxForm: '',
-    inMyTeam: false
+    inMyTeam: false,
+    penaltyTaker: false,
+    freeKickTaker: false,
+    cornerTaker: false
   });
 
   // Update state when props change
@@ -102,6 +105,17 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
 
       // My team filter
       if (filters.inMyTeam && !myTeamPlayerIds.includes(player.id)) {
+        return false;
+      }
+
+      // Set piece filters
+      if (filters.penaltyTaker && player.penalties_order !== 1) {
+        return false;
+      }
+      if (filters.freeKickTaker && player.direct_freekicks_order !== 1) {
+        return false;
+      }
+      if (filters.cornerTaker && player.corners_and_indirect_freekicks_order !== 1) {
         return false;
       }
 
@@ -244,6 +258,9 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
                 >
                   Selected % {getSortIndicator('selected_by_percent')}
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  Set-Pieces
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -290,8 +307,37 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {player.selected_by_percent}%
-                  </td>
-                </tr>
+                  </td>                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="flex items-center gap-1">
+                      {player.penalties_order === 1 && (
+                        <span 
+                          className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-purple-600 rounded-full"
+                          title="Penalty Taker"
+                          aria-label="Penalty Taker"
+                        >
+                          P
+                        </span>
+                      )}
+                      {player.direct_freekicks_order === 1 && (
+                        <span 
+                          className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-blue-600 rounded-full"
+                          title="Direct Free Kick Taker"
+                          aria-label="Direct Free Kick Taker"
+                        >
+                          F
+                        </span>
+                      )}
+                      {player.corners_and_indirect_freekicks_order === 1 && (
+                        <span 
+                          className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-green-600 rounded-full"
+                          title="Corner & Indirect Free Kick Taker"
+                          aria-label="Corner & Indirect Free Kick Taker"
+                        >
+                          C
+                        </span>
+                      )}
+                    </div>
+                  </td>                </tr>
               );
               })}
             </tbody>
