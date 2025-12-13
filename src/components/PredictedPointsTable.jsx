@@ -70,7 +70,9 @@ class FPLPredictor {
         // Simplified predictions
         const goalProb = threat * 0.0015;
         const assistProb = creativity * 0.001;
-        const cleanSheetProb = 0.3;
+
+        // Replace with team-wide clean sheet probability.
+        const cleanSheetProb = (player.starts > 6) ? parseFloat(player.clean_sheets_per_90) || 0 : 0;
         
         const positionId = player.element_type; // 1:GK, 2:DEF, 3:MID, 4:FWD
         
@@ -86,6 +88,14 @@ class FPLPredictor {
             predictedPoints += (goalProb * 5) + (assistProb * 3) + (cleanSheetProb * 1);
         } else if (positionId === 4) { // FWD
             predictedPoints += (goalProb * 4) + (assistProb * 3);
+        }
+        
+        // Bonus points for high defensive contributions, add for players that surpass the threshold on average
+        const defCon = parseFloat(player.defensive_contribution_per_90) || 0;
+        if ((positionId === 3 || positionId === 4) && defCon > 12) {
+            predictedPoints += 2;
+        } else if (positionId === 2 && defCon > 10) {
+            predictedPoints += 2;
         }
         
         return this.formatOutput(player, predictedPoints, goalProb, assistProb, cleanSheetProb);
@@ -105,6 +115,8 @@ class FPLPredictor {
             cost: cost,
             fixtures: 1, // Assume 1 fixture
             // Injured (I) or Suspended (S) => nailedness 0
+
+            // Replace with more accurate assessment if player is likely to start
             nailedness: (player.status == "i" || player.status == "s") ? 0.0 : 1.0, // Set nailedness to 0 if injured/suspended
             
             goal_prob: parseFloat((goalProb || 0).toFixed(2)), // Simplify probabilities to 2 d.p
