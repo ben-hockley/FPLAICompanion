@@ -1,5 +1,5 @@
 // Status icon component for player availability status
-const StatusIcon = ({ status, className = "" }) => {
+const StatusIcon = ({ status, news = "", className = "" }) => {
   if (!status || status === 'a') return null;
 
   const statusConfig = {
@@ -12,11 +12,14 @@ const StatusIcon = ({ status, className = "" }) => {
   const config = statusConfig[status.toLowerCase()];
   if (!config) return null;
 
+  // Use news if available, otherwise default to status text
+  const tooltipText = news && news.trim() !== "" ? news : config.text;
+
   return (
     <span 
       className={`inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white ${config.color} rounded-full ${className}`}
-      title={config.text}
-      aria-label={config.text}
+      title={tooltipText}
+      aria-label={tooltipText}
     >
       {config.icon}
     </span>

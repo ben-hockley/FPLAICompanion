@@ -74,7 +74,7 @@ class FPLPredictor {
         
         const positionId = player.element_type; // 1:GK, 2:DEF, 3:MID, 4:FWD
         
-        // Base points for playing 90 minutes
+        // Base points for playing 90 minutes (skip if injured or suspended)
         let predictedPoints = 2;
         
         // Add points based on position and probabilities
@@ -93,20 +93,24 @@ class FPLPredictor {
 
     formatOutput(player, points, goalProb, assistProb, cleanSheetProb) {
         const cost = player.now_cost / 10;
-        const pPoints = parseFloat(points.toFixed(2));
+        let pPoints = parseFloat(points.toFixed(2));
         const positionId = player.element_type;
         return {
             id: player.id,
             name: player.web_name,
+            status: player.status,
+            news: player.news || "",
             team: this.teamNames[player.team],
             position: positionId === 1 ? 'GK' : positionId === 2 ? 'DEF' : positionId === 3 ? 'MID' : 'FWD',
             cost: cost,
             fixtures: 1, // Assume 1 fixture
-            nailedness: 1.0, // Assume all players are nailed (90 mins)
-            goal_prob: parseFloat((goalProb || 0).toFixed(2)),
+            // Injured (I) or Suspended (S) => nailedness 0
+            nailedness: (player.status == "i" || player.status == "s") ? 0.0 : 1.0, // Set nailedness to 0 if injured/suspended
+            
+            goal_prob: parseFloat((goalProb || 0).toFixed(2)), // Simplify probabilities to 2 d.p
             assist_prob: parseFloat((assistProb || 0).toFixed(2)),
             clean_sheet_prob: positionId === 4 ? null : parseFloat((cleanSheetProb || 0).toFixed(2)),
-            predicted_points: pPoints,
+            predicted_points: (player.status == "i" || player.status == "s") ? 0.0 : pPoints, // Set predicted points to 0 if injured/suspended
             roi: parseFloat((pPoints / cost).toFixed(2))
         };
     }
@@ -115,6 +119,7 @@ class FPLPredictor {
 // React Component
 import { useState, useEffect } from 'react';
 import PlayerModal from './PlayerModal';
+import StatusIcon from './StatusIcon';
 
 export default function PredictedPointsTable({ myTeamPlayerIds = [] }) {
     const [allPlayers, setAllPlayers] = useState([]);
@@ -263,7 +268,7 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [] }) {
         <div className="flex flex-col h-[600px]">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">
-                    AI Predicted Points for GW {gameweek}
+                    Predicted Points for GW {gameweek}
                 </h2>
                 {myTeamPlayerIds.length > 0 && (
                     <label className="flex items-center space-x-3 cursor-pointer">
@@ -371,7 +376,10 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [] }) {
                                         {index + 1}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {player.name}
+                                        <div className="flex items-center gap-2">
+                                            {player.name}
+                                            <StatusIcon status={player.status} news={player.news} />
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {player.team}

@@ -208,7 +208,7 @@ const PlayerModal = ({ player, teams, players = [], onClose }) => {
                   return null;
                 })()}
                 {player.first_name} {player.second_name}
-                <StatusIcon status={player.status} className="w-5 h-5 text-xs" />
+                <StatusIcon status={player.status} news={player.news} className="w-5 h-5 text-xs" />
               </h2>
               <div className="flex flex-wrap gap-3 mb-3">
                 <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">

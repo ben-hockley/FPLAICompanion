@@ -172,7 +172,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
         <div className="text-center flex-1 flex flex-col justify-center">
           <div className={`${isSub ? 'text-xs' : 'text-sm'} font-bold text-gray-900 truncate w-full px-1 flex items-center justify-center gap-1`}>
             <span className="truncate">{player.web_name}</span>
-            <StatusIcon status={player.status} />
+            <StatusIcon status={player.status} news={player.news} />
           </div>
           <div className={`${isSub ? 'text-[10px]' : 'text-xs'} text-gray-800`}>
             {teams[player.team]}

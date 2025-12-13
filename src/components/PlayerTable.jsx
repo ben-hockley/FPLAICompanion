@@ -260,7 +260,7 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <div className="flex items-center gap-2">
                       {player.web_name}
-                      <StatusIcon status={player.status} />
+                      <StatusIcon status={player.status} news={player.news} />
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
