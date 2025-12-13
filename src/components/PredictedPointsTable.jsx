@@ -3,10 +3,8 @@
  * A robust algorithm for forecasting player performance in the Fantasy Premier League.
  * 
  * Features:
- * - Parallel Data Ingestion
- * - EWMA Form Calculation
- * - Poisson-based Implied Odds
- * - Custom FDR & Nailedness Logic
+ * - Simplified Predicted Points Calculation.
+ * - Uses ICT Index to estimate goal and assist probabilities.
  */
 
 // Use the dev-server proxy at `/api` to avoid CORS in the browser.
@@ -15,50 +13,26 @@ const BASE_URL = '/api';
 class FPLPredictor {
     constructor() {
         this.bootstrap = null;
-        this.fixtures = null;
         this.activePlayers = [];
-        this.teamStrength = {}; 
-        this.nextGwId = null;
-        
-        // Configuration for EWMA (Exponential Weighted Moving Average)
-        // Alpha determines the "memory" of the form. Higher = more reactive.
-        this.ALPHA_POINTS = 0.25; 
-        this.ALPHA_ICT = 0.15;    
+        this.teamNames = {};
     }
 
-    /**
-     * PHASE 1: Data Ingestion
-     * Fetches static global data and builds the Team Strength lookup table.
-     */
     async init() {
-        console.log("Initializing FPL Data Pipeline...");
+        console.log("Initializing FPL Data...");
         
         try {
-            // Parallel fetch for speed
-            const [bootstrapRes, fixturesRes] = await Promise.all([
-                fetch(`${BASE_URL}/bootstrap-static/`),
-                fetch(`${BASE_URL}/fixtures/`)
-            ]);
-
-            if (!bootstrapRes.ok ||!fixturesRes.ok) throw new Error("API Fetch Failed");
+            const bootstrapRes = await fetch(`${BASE_URL}/bootstrap-static/`);
+            if (!bootstrapRes.ok) throw new Error("API Fetch Failed");
 
             this.bootstrap = await bootstrapRes.json();
-            this.fixtures = await fixturesRes.json();
 
-            // Identify the next Gameweek
-            const nextEvent = this.bootstrap.events.find(e => e.is_next);
-            if (!nextEvent) throw new Error("Season finished or no next gameweek found.");
-            this.nextGwId = nextEvent.id;
-            console.log(`Target Prediction: Gameweek ${this.nextGwId}`);
+            // Build team name lookup
+            this.bootstrap.teams.forEach(team => {
+                this.teamNames[team.id] = team.name;
+            });
 
-            // Build O(1) Lookup Map for Team Strength
-            this.buildTeamStrengthMap();
-
-            // Filter for Active Players
-            // Heuristic: Must not be 'unavailable' and must have played some minutes OR have a chance of playing.
-            this.activePlayers = this.bootstrap.elements.filter(p => 
-                p.status!== 'u' && (p.minutes > 0 || p.chance_of_playing_next_round > 0)
-            );
+            // Filter for Active Players (not unavailable)
+            this.activePlayers = this.bootstrap.elements.filter(p => p.status !== 'u');
             console.log(`Active Players identified: ${this.activePlayers.length}`);
 
         } catch (error) {
@@ -67,50 +41,20 @@ class FPLPredictor {
         }
     }
 
-    /**
-     * Maps team strength data for fast access.
-     * Normalizes raw strength values (1000-1350) to a baseline (approx 1050).
-     */
-    buildTeamStrengthMap() {
-        const BASELINE = 1050; // League average baseline
-        this.bootstrap.teams.forEach(team => {
-            this.teamStrength[team.id] = {
-                name: team.name,
-                // Normalize to a ratio around 1.0
-                att_home: team.strength_attack_home / BASELINE,
-                att_away: team.strength_attack_away / BASELINE,
-                def_home: team.strength_defence_home / BASELINE,
-                def_away: team.strength_defence_away / BASELINE
-            };
-        });
-    }
-
-    /**
-     * PHASE 2: Prediction Generation
-     * Batches player processing to respect API rate limits.
-     */
     async generatePredictions() {
         const predictions = [];
-        const BATCH_SIZE = 25; 
         
         console.log("Starting prediction cycle...");
 
-        for (let i = 0; i < this.activePlayers.length; i += BATCH_SIZE) {
-            const batch = this.activePlayers.slice(i, i + BATCH_SIZE);
-            
-            // Map batch to promises
-            const batchPromises = batch.map(player => this.analyzePlayer(player));
-            const batchResults = await Promise.all(batchPromises);
-            
-            // Filter nulls (players with errors or no fixtures)
-            predictions.push(...batchResults.filter(p => p!== null));
-            
-            // Rate Limiting Delay
-            await new Promise(r => setTimeout(r, 150)); 
+        // Process all active players directly - no need to fetch individual data
+        for (let i = 0; i < this.activePlayers.length; i++) {
+            const player = this.activePlayers[i];
+            const prediction = this.analyzePlayer(player);
+            predictions.push(prediction);
             
             // Progress Logging
-            if ((i + BATCH_SIZE) % 100 === 0) {
-                console.log(`Processed ${i + BATCH_SIZE} players...`);
+            if ((i + 1) % 100 === 0) {
+                console.log(`Processed ${i + 1} players...`);
             }
         }
 
@@ -118,170 +62,52 @@ class FPLPredictor {
         return predictions.sort((a, b) => b.predicted_points - a.predicted_points);
     }
 
-    /**
-     * PHASE 3: Individual Player Analysis
-     * The core algorithmic logic resides here.
-     */
-    async analyzePlayer(player) {
-        try {
-            // Fetch detailed history
-            const summaryRes = await fetch(`${BASE_URL}/element-summary/${player.id}/`);
-            if (!summaryRes.ok) return null;
-            
-            const summary = await summaryRes.json();
-            const history = summary.history;
-            
-            // Filter fixtures for the NEXT Gameweek only
-            const upcoming = summary.fixtures.filter(f => f.event === this.nextGwId);
-
-            if (upcoming.length === 0) return this.formatOutput(player, 0, 0, "Blank GW");
-
-            // --- FEATURE ENGINEERING ---
-
-            // 1. EWMA Form Calculation
-            const ewmaStats = this.calculateEWMA(history);
-            
-            // 2. Nailedness (Expected Minutes)
-            const expectedMinutes = this.calculateNailedness(history, player);
-            const nailednessCoeff = expectedMinutes / 90;
-
-            // --- PREDICTION LOGIC ---
-
-            let totalImpliedPoints = 0;
-            let totalGoalProb = 0;
-            let totalAssistProb = 0;
-            let totalCleanSheetProb = 0;
-
-            // Loop through fixtures (handles Double Gameweeks automatically)
-            for (let i = 0; i < upcoming.length; i++) {
-                const fixture = upcoming[i];
-                const isHome = fixture.team_h === player.team;
-                const opponentId = isHome? fixture.team_a : fixture.team_h;
-                
-                // Rotation damping for 2nd game of a Double Gameweek
-                const dgwDamping = (i > 0)? 0.85 : 1.0; 
-
-                // A. Team Strength Logic (Implied Goals)
-                const teamStats = this.teamStrength[player.team];
-                const oppStats = this.teamStrength[opponentId];
-                
-                const attackRating = isHome? teamStats.att_home : teamStats.att_away;
-                const oppDefRating = isHome? oppStats.def_away : oppStats.def_home;
-                
-                const BASE_GOALS = 1.4; // PL Avg
-                const HFA = isHome? 1.15 : 0.85; 
-
-                // The Team's expected goals for this match
-                const impliedTeamGoals = BASE_GOALS * attackRating * (1 / oppDefRating) * HFA;
-                
-                // B. Poisson for Clean Sheets
-                const oppAttack = isHome? oppStats.att_away : oppStats.att_home;
-                const myDef = isHome? teamStats.def_home : teamStats.def_away;
-                const impliedOppGoals = BASE_GOALS * oppAttack * (1 / myDef) * (1/HFA); 
-                
-                // Probability of conceding 0 goals: e^(-lambda)
-                const cleanSheetProb = Math.exp(-impliedOppGoals);
-
-                // C. Player Share (Micro Model)
-                const positionId = player.element_type; // 1:GK, 2:DEF, 3:MID, 4:FWD
-                let matchPoints = 0;
-                
-                // Appearance Points
-                matchPoints += (expectedMinutes >= 60)? 2 : (expectedMinutes > 0? 1 : 0);
-
-                // Attacking Returns (Heuristic based on ICT Threat)
-                // We use a scaler to convert Threat score to "Share of Goals"
-                const THREAT_SCALAR = 0.007; 
-                const goalProb = impliedTeamGoals * (ewmaStats.threat * THREAT_SCALAR);
-                const assistProb = impliedTeamGoals * (ewmaStats.creativity * THREAT_SCALAR * 0.6);
-
-                // Accumulate probabilities across fixtures
-                totalGoalProb += goalProb;
-                totalAssistProb += assistProb;
-                totalCleanSheetProb += cleanSheetProb;
-
-                // Apply Position Modifiers
-                if (positionId === 4) { // Forward
-                    matchPoints += (goalProb * 4) + (assistProb * 3);
-                } else if (positionId === 3) { // Mid
-                    matchPoints += (goalProb * 5) + (assistProb * 3) + (cleanSheetProb * 1);
-                } else if (positionId === 2) { // Def
-                    matchPoints += (goalProb * 6) + (assistProb * 3) + (cleanSheetProb * 4);
-                } else { // GK
-                    matchPoints += (cleanSheetProb * 4) + 0.5; // +0.5 for saves
-                }
-
-                totalImpliedPoints += (matchPoints * dgwDamping);
-            }
-
-            // Final Calculation
-            const finalPrediction = totalImpliedPoints * nailednessCoeff;
-
-            return this.formatOutput(player, finalPrediction, upcoming.length, nailednessCoeff, totalGoalProb, totalAssistProb, totalCleanSheetProb);
-
-        } catch (error) {
-            return null; // Fail silently for individual player errors
-        }
-    }
-
-    /**
-     * Helper: Calculate Exponential Weighted Moving Averages
-     */
-    calculateEWMA(history) {
-        if (!history || history.length === 0) return { threat: 0, creativity: 0 };
-
-        let ewmaThreat = 0;
-        let ewmaCreativity = 0;
-
-        // history is usually chronological. We iterate to build the moving average.
-        history.forEach((match, index) => {
-            const threat = parseFloat(match.threat);
-            const creativity = parseFloat(match.creativity);
-
-            if (index === 0) {
-                ewmaThreat = threat;
-                ewmaCreativity = creativity;
-            } else {
-                ewmaThreat = (this.ALPHA_ICT * threat) + ((1 - this.ALPHA_ICT) * ewmaThreat);
-                ewmaCreativity = (this.ALPHA_ICT * creativity) + ((1 - this.ALPHA_ICT) * ewmaCreativity);
-            }
-        });
-
-        return { threat: ewmaThreat, creativity: ewmaCreativity };
-    }
-
-    /**
-     * Helper: Calculate Nailedness Coefficient
-     */
-    calculateNailedness(history, player) {
-        const recent = history.slice(-5); // Last 5 matches
-        if (recent.length === 0) return 0;
-
-        const avgMin = recent.reduce((sum, m) => sum + m.minutes, 0) / recent.length;
+    analyzePlayer(player) {
+        // Get ICT scores from bootstrap data
+        const threat = parseFloat(player.threat) || 0;
+        const creativity = parseFloat(player.creativity) || 0;
         
-        let chance = player.chance_of_playing_next_round;
-        if (chance === null) chance = 100; // API uses null for 100%
-
-        return avgMin * (chance / 100);
+        // Simplified predictions
+        const goalProb = threat * 0.0015;
+        const assistProb = creativity * 0.001;
+        const cleanSheetProb = 0.3;
+        
+        const positionId = player.element_type; // 1:GK, 2:DEF, 3:MID, 4:FWD
+        
+        // Base points for playing 90 minutes
+        let predictedPoints = 2;
+        
+        // Add points based on position and probabilities
+        if (positionId === 1) { // GK
+            predictedPoints += (goalProb * 6) + (assistProb * 3) + (cleanSheetProb * 4) + 0.5;
+        } else if (positionId === 2) { // DEF
+            predictedPoints += (goalProb * 6) + (assistProb * 3) + (cleanSheetProb * 4);
+        } else if (positionId === 3) { // MID
+            predictedPoints += (goalProb * 5) + (assistProb * 3) + (cleanSheetProb * 1);
+        } else if (positionId === 4) { // FWD
+            predictedPoints += (goalProb * 4) + (assistProb * 3);
+        }
+        
+        return this.formatOutput(player, predictedPoints, goalProb, assistProb, cleanSheetProb);
     }
 
-    formatOutput(player, points, fixtures, nailednessCoeff, goalProb, assistProb, cleanSheetProb) {
+    formatOutput(player, points, goalProb, assistProb, cleanSheetProb) {
         const cost = player.now_cost / 10;
         const pPoints = parseFloat(points.toFixed(2));
         const positionId = player.element_type;
         return {
             id: player.id,
             name: player.web_name,
-            team: this.teamStrength[player.team].name,
-            position: positionId === 1? 'GK' : positionId === 2? 'DEF' : positionId === 3? 'MID' : 'FWD',
+            team: this.teamNames[player.team],
+            position: positionId === 1 ? 'GK' : positionId === 2 ? 'DEF' : positionId === 3 ? 'MID' : 'FWD',
             cost: cost,
-            fixtures: fixtures,
-            nailedness: parseFloat((nailednessCoeff || 0).toFixed(2)),
+            fixtures: 1, // Assume 1 fixture
+            nailedness: 1.0, // Assume all players are nailed (90 mins)
             goal_prob: parseFloat((goalProb || 0).toFixed(2)),
             assist_prob: parseFloat((assistProb || 0).toFixed(2)),
-            clean_sheet_prob: positionId === 4 ? null : parseFloat((cleanSheetProb || 0).toFixed(2)), // null for forwards
+            clean_sheet_prob: positionId === 4 ? null : parseFloat((cleanSheetProb || 0).toFixed(2)),
             predicted_points: pPoints,
-            roi: parseFloat((pPoints / cost).toFixed(2)) // Points per Million
+            roi: parseFloat((pPoints / cost).toFixed(2))
         };
     }
 }
