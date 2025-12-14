@@ -18,6 +18,13 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
   const [showHelp, setShowHelp] = useState(false);
   const [managerInfo, setManagerInfo] = useState(null);
   const [loadedManagerId, setLoadedManagerId] = useState(null);
+  const [managerLeagues, setManagerLeagues] = useState([]);
+  const [selectedLeague, setSelectedLeague] = useState(null);
+  const [leagueStandings, setLeagueStandings] = useState([]);
+  const [leagueMeta, setLeagueMeta] = useState(null);
+  const [loadingStandings, setLoadingStandings] = useState(false);
+  const [standingsShowCount, setStandingsShowCount] = useState(25);
+  const [leagueUserPosition, setLeagueUserPosition] = useState(null);
 
   const CURRENT_GAMEWEEK = 15;
 
@@ -76,6 +83,17 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
               region: managerData.player_region_id,
               favouriteTeam: managerData.favourite_team
             });
+            // collect leagues from manager data (classic and h2h)
+            const leaguesList = [];
+            if (managerData.leagues) {
+              if (managerData.leagues.classic && Array.isArray(managerData.leagues.classic)) {
+                managerData.leagues.classic.forEach(l => leaguesList.push({ id: l.id, name: l.name || l.league_name || `League ${l.id}`, type: 'classic', position: l.entry_rank || l.rank || l.position || null }));
+              }
+              if (managerData.leagues.h2h && Array.isArray(managerData.leagues.h2h)) {
+                managerData.leagues.h2h.forEach(l => leaguesList.push({ id: l.id, name: l.name || l.league_name || `H2H ${l.id}`, type: 'h2h', position: l.entry_rank || l.rank || l.position || null }));
+              }
+            }
+            setManagerLeagues(leaguesList);
             setLoadedManagerId(managerId);
           }
         } catch (err) {
@@ -192,6 +210,178 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
         const multiplier = pick.is_captain ? 2 : 1;
         return total + (points * multiplier);
       }, 0);
+  };
+
+  // Fetch standings for a league (classic or h2h)
+  const fetchLeagueStandings = async (leagueId, type = 'classic') => {
+    if (!leagueId) return;
+    setLoadingStandings(true);
+    setLeagueStandings([]);
+    setLeagueMeta(null);
+    setStandingsShowCount(25);
+    setLeagueUserPosition(null);
+
+    try {
+      const endpoint = type === 'h2h' ? `/api/leagues-h2h/${leagueId}/standings/` : `/api/leagues-classic/${leagueId}/standings/`;
+      const res = await fetch(endpoint);
+      if (!res.ok) throw new Error('Failed to load league standings');
+      const data = await res.json();
+
+      // Normalize standings array
+      let standings = [];
+      let meta = null;
+      if (data.standings && data.standings.results) {
+        standings = data.standings.results;
+        meta = data.league || data.standings || null;
+      } else if (data.results) {
+        standings = data.results;
+        meta = data.league || null;
+      } else if (Array.isArray(data)) {
+        standings = data;
+      }
+
+      setLeagueStandings(standings || []);
+      setLeagueMeta(meta);
+
+      // find user's position from the managerLeagues info first (covers when user's position is provided by user endpoint)
+      const selected = managerLeagues.find(l => String(l.id) === String(leagueId) && l.type === type);
+      if (selected && selected.position != null) {
+        setLeagueUserPosition(selected.position);
+      } else {
+        // fallback: search in fetched standings
+        const myEntryId = parseInt(managerId, 10);
+        const myRow = (standings || []).find(r => (r.entry || r.id || (r.player && r.player.id)) === myEntryId || (r.entry && r.entry === myEntryId));
+        if (myRow) {
+          const pos = myRow.rank || myRow.position || myRow.overall_rank || myRow.entry_rank || null;
+          setLeagueUserPosition(pos);
+        }
+      }
+    } catch (err) {
+      console.error('League standings error', err);
+    } finally {
+      setLoadingStandings(false);
+    }
+  };
+
+  const handleLeagueChange = (e) => {
+    const value = e.target.value;
+    if (!value) {
+      setSelectedLeague(null);
+      setLeagueStandings([]);
+      setLeagueMeta(null);
+      return;
+    }
+    const [type, id] = value.split(':');
+    const leagueObj = managerLeagues.find(l => String(l.id) === id && l.type === type);
+    setSelectedLeague(leagueObj || null);
+    fetchLeagueStandings(id, type);
+  };
+
+  const onStandingsScroll = (e) => {
+    const el = e.target;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 80) {
+      // near bottom -> load more
+      if (standingsShowCount < (leagueStandings.length || 0)) {
+        setStandingsShowCount(prev => Math.min(prev + 25, leagueStandings.length));
+      }
+    }
+  };
+
+  // Load any entry's team into the formation box (updates managerId input and leagues)
+  const fetchEntryTeam = async (entryId, gameweek = currentGameweek) => {
+    if (!entryId) return;
+    setLoading(true);
+    setError(null);
+    
+    // Update manager ID input to reflect the new team
+    setManagerId(String(entryId));
+    setLoadedManagerId(String(entryId));
+    
+    // Reset league selection and standings
+    setSelectedLeague(null);
+    setLeagueStandings([]);
+    setLeagueMeta(null);
+    setLeagueUserPosition(null);
+    
+    try {
+      // fetch entry picks
+      const picksRes = await fetch(`/api/entry/${entryId}/event/${gameweek}/picks/`);
+      if (!picksRes.ok) throw new Error('Failed to fetch selected team');
+      const picksData = await picksRes.json();
+
+      // enrich picks similar to fetchTeam
+      const enrichedPicks = await Promise.all(picksData.picks.map(async pick => {
+        const player = allPlayers.find(p => p.id === pick.element);
+        try {
+          const playerResponse = await fetch(`/api/element-summary/${pick.element}/`);
+          if (playerResponse.ok) {
+            const playerData = await playerResponse.json();
+            const gwHistory = playerData.history.find(h => h.round === gameweek);
+            return {
+              ...pick,
+              playerData: {
+                ...player,
+                event_points: gwHistory ? gwHistory.total_points : 0
+              }
+            };
+          }
+        } catch (err) {
+          console.error(`Failed to fetch player ${pick.element} details:`, err);
+        }
+        return {
+          ...pick,
+          playerData: {
+            ...player,
+            event_points: 0
+          }
+        };
+      }));
+
+      setTeamData({ ...picksData, picks: enrichedPicks });
+
+      // fetch entry manager details to display name/team and populate leagues
+      try {
+        const managerRes = await fetch(`/api/entry/${entryId}/`);
+        if (managerRes.ok) {
+          const m = await managerRes.json();
+          setManagerInfo({
+            name: m.player_first_name + ' ' + m.player_last_name,
+            teamName: m.name,
+            region: m.player_region_id,
+            favouriteTeam: m.favourite_team
+          });
+          
+          // Populate leagues for the new manager
+          const leaguesList = [];
+          if (m.leagues) {
+            if (m.leagues.classic && Array.isArray(m.leagues.classic)) {
+              m.leagues.classic.forEach(l => leaguesList.push({ id: l.id, name: l.name || l.league_name || `League ${l.id}`, type: 'classic', position: l.entry_rank || l.rank || l.position || null }));
+            }
+            if (m.leagues.h2h && Array.isArray(m.leagues.h2h)) {
+              m.leagues.h2h.forEach(l => leaguesList.push({ id: l.id, name: l.name || l.league_name || `H2H ${l.id}`, type: 'h2h', position: l.entry_rank || l.rank || l.position || null }));
+            }
+          }
+          setManagerLeagues(leaguesList);
+        }
+      } catch (err) {
+        console.error('Failed to fetch entry manager info', err);
+      }
+
+      // notify parent of loaded team player IDs
+      if (onTeamLoaded) {
+        const playerIds = enrichedPicks.map(pick => pick.element);
+        onTeamLoaded(playerIds);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load team');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectTeam = (entryId) => {
+    if (!entryId) return;
+    fetchEntryTeam(entryId);
   };
 
   const PlayerCard = ({ pick, isSub = false }) => {
@@ -463,6 +653,96 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
                 {(teamData.entry_history?.overall_rank || 0).toLocaleString()}
               </div>
             </div>
+          </div>
+
+          {/* League Standings - same box, below team stats */}
+          <div className="mt-6 bg-white rounded-lg shadow-md p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-bold text-gray-800">League Standings</h3>
+              <div className="flex items-center gap-3">
+                <select
+                  value={selectedLeague ? `${selectedLeague.type}:${selectedLeague.id}` : ''}
+                  onChange={handleLeagueChange}
+                  className="px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">Select a league</option>
+                  {managerLeagues && managerLeagues.map(l => (
+                    <option key={`${l.type}-${l.id}`} value={`${l.type}:${l.id}`}>
+                      {l.name} {l.type === 'h2h' ? '(H2H)' : ''}
+                    </option>
+                  ))}
+                </select>
+                {leagueMeta && (
+                  <div className="text-sm text-gray-600">{leagueMeta.name || leagueMeta.league_name}</div>
+                )}
+              </div>
+            </div>
+
+            {loadingStandings && (
+              <div className="text-sm text-gray-500">Loading standings...</div>
+            )}
+
+            {!loadingStandings && (!leagueStandings || leagueStandings.length === 0) && (
+              <div className="text-sm text-gray-500">No standings loaded. Select a league above to view standings.</div>
+            )}
+
+            {!loadingStandings && leagueStandings && leagueStandings.length > 0 && (
+              <>
+                <div className="text-sm text-gray-700 mb-2">Your position: {leagueUserPosition ?? '—'}</div>
+                <div className="border rounded overflow-hidden">
+                  <div
+                    className="max-h-64 overflow-y-auto"
+                    onScroll={onStandingsScroll}
+                  >
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th className="px-3 py-2">#</th>
+                          <th className="px-3 py-2">Team / Manager</th>
+                          <th className="px-3 py-2">Points</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {leagueStandings.slice(0, standingsShowCount).map((row, idx) => {
+                          const rank = row.rank || row.position || row.overall_rank || row.entry_rank || (idx + 1);
+                          const entryId = row.entry || row.id || (row.player && row.player.id) || null;
+                          const teamName = row.entry_name || row.team_name || row.team || row.team_name || '';
+                          const managerName = row.player_name || (row.owner && row.owner.name) || row.player || '';
+                          const points = row.total || row.points || row.player_points || row.league_points || '-';
+                          const isMe = entryId && Number(entryId) === Number(managerId);
+                          return (
+                            <tr
+                              key={entryId || idx}
+                              className={`${isMe ? 'bg-blue-50 font-semibold' : 'hover:bg-gray-50'} cursor-pointer`}
+                              onClick={() => handleSelectTeam(entryId)}
+                            >
+                              <td className="px-3 py-2 align-top w-12">{rank}</td>
+                              <td className="px-3 py-2 align-top">
+                                <div className="font-medium">{teamName || managerName || `Entry ${entryId}`}</div>
+                                {managerName && <div className="text-xs text-gray-500">{managerName}</div>}
+                              </td>
+                              <td className="px-3 py-2 align-top w-24">{points}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Load more indicator/button */}
+                  {standingsShowCount < leagueStandings.length && (
+                    <div className="p-3 text-center">
+                      <button
+                        onClick={() => setStandingsShowCount(prev => Math.min(prev + 25, leagueStandings.length))}
+                        className="px-4 py-2 bg-gray-100 rounded-lg border border-gray-200 hover:bg-gray-50"
+                      >
+                        Load more
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
           {/* AI Transfer Recommendations Button */}
