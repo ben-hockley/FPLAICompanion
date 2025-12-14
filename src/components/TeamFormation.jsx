@@ -26,7 +26,24 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
   const [standingsShowCount, setStandingsShowCount] = useState(25);
   const [leagueUserPosition, setLeagueUserPosition] = useState(null);
 
-  const CURRENT_GAMEWEEK = 15;
+  const [CURRENT_GAMEWEEK, setCURRENT_GAMEWEEK] = useState(() => {
+    // Kick off async fetch once during initial render to avoid adding useEffect import
+    fetch('/api/bootstrap-static/')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!data) return;
+        const gw = data.current_event
+          || (Array.isArray(data.events) && data.events.find(e => e.is_current)?.id)
+          || (Array.isArray(data.events) && data.events.find(e => !e.finished)?.id)
+          || 16;
+        setCURRENT_GAMEWEEK(gw);
+      })
+      .catch(() => {
+        /* ignore errors, keep fallback value */
+      });
+    // fallback until fetch completes
+    return 16;
+  });
 
   const POSITION_MAP = {
     1: 'GK',

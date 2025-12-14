@@ -154,6 +154,7 @@ function App() {
           allPlayers={players}
           onClose={() => setSelectedTeam(null)}
           onPlayerClick={handlePlayerClick}
+          onTeamClick={handleTeamClick}
         />
       )}
     </div>
