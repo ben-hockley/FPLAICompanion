@@ -3,7 +3,7 @@ import PlayerModal from './PlayerModal';
 import FilterModal from './FilterModal';
 import StatusIcon from './StatusIcon';
 
-const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlayerIds = [] }) => {
+const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlayerIds = [], onTeamClick }) => {
   const [players, setPlayers] = useState(initialPlayers || []);
   const [teams, setTeams] = useState(initialTeams || {});
   const [sortConfig, setSortConfig] = useState({ key: 'total_points', direction: 'desc' });
@@ -280,7 +280,13 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
                       <StatusIcon status={player.status} news={player.news} />
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 cursor-pointer hover:text-blue-600 hover:underline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onTeamClick && onTeamClick(player.team);
+                    }}
+                  >
                     {teams[player.team]}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
@@ -357,6 +363,7 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
           teams={teams}
           players={players}
           onClose={handleCloseModal}
+          onTeamClick={onTeamClick}
         />
       )}
 

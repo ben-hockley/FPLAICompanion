@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { TEAM_BADGES } from '../utils/teamBadges';
 
-const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick }) => {
+const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTeamClick }) => {
   const [fixtureDetails, setFixtureDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -248,6 +248,13 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick }) =>
     onClose();
   };
 
+  const handleTeamClick = (teamId) => {
+    if (onTeamClick) {
+      onTeamClick(teamId);
+      onClose();
+    }
+  };
+
   const getStatValue = (statIdentifier, isHome) => {
     if (!fixtureDetails?.stats) return null;
     const stat = fixtureDetails.stats.find(s => s.identifier === statIdentifier);
@@ -296,7 +303,7 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick }) =>
             <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
               <div className="flex items-center justify-center gap-8">
                 {/* Home Team */}
-                <div className="flex flex-col items-center flex-1">
+                <div className="flex flex-col items-center flex-1 cursor-pointer hover:opacity-80 transition" onClick={() => handleTeamClick(fixture.team_h)}>
                   <img
                     src={getTeamBadgeUrl(fixture.team_h)}
                     alt={teams[fixture.team_h]}
@@ -334,7 +341,7 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick }) =>
                 </div>
 
                 {/* Away Team */}
-                <div className="flex flex-col items-center flex-1">
+                <div className="flex flex-col items-center flex-1 cursor-pointer hover:opacity-80 transition" onClick={() => handleTeamClick(fixture.team_a)}>
                   <img
                     src={getTeamBadgeUrl(fixture.team_a)}
                     alt={teams[fixture.team_a]}

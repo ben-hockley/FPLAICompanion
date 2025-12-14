@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import FixtureModal from './FixtureModal';
 import { TEAM_BADGES } from '../utils/teamBadges';
 
-const FixturesBar = ({ teams, allPlayers, onPlayerClick }) => {
+const FixturesBar = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
   const [fixtures, setFixtures] = useState([]);
   const [currentGameweek, setCurrentGameweek] = useState(null); // Actual current GW
   const [displayedGameweek, setDisplayedGameweek] = useState(null); // GW being displayed
@@ -194,7 +194,13 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick }) => {
                       className="w-6 h-6 object-contain flex-shrink-0"
                       onError={(e) => e.target.style.display = 'none'}
                     />
-                    <span className="text-sm font-semibold text-gray-800 truncate">
+                    <span 
+                      className="text-sm font-semibold text-gray-800 truncate hover:text-blue-600 hover:underline cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTeamClick && onTeamClick(fixture.team_h);
+                      }}
+                    >
                       {teams[fixture.team_h]}
                     </span>
                   </div>
@@ -214,7 +220,13 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick }) => {
                       className="w-6 h-6 object-contain flex-shrink-0"
                       onError={(e) => e.target.style.display = 'none'}
                     />
-                    <span className="text-sm font-semibold text-gray-800 truncate">
+                    <span 
+                      className="text-sm font-semibold text-gray-800 truncate hover:text-blue-600 hover:underline cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTeamClick && onTeamClick(fixture.team_a);
+                      }}
+                    >
                       {teams[fixture.team_a]}
                     </span>
                   </div>
@@ -251,6 +263,7 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick }) => {
           allPlayers={allPlayers}
           onClose={() => setSelectedFixture(null)}
           onPlayerClick={onPlayerClick}
+          onTeamClick={onTeamClick}
         />
       )}
     </div>

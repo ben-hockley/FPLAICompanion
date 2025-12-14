@@ -111,6 +111,7 @@ class FPLPredictor {
             status: player.status,
             news: player.news || "",
             team: this.teamNames[player.team],
+            team_id: player.team,
             position: positionId === 1 ? 'GK' : positionId === 2 ? 'DEF' : positionId === 3 ? 'MID' : 'FWD',
             cost: cost,
             fixtures: 1, // Assume 1 fixture
@@ -133,7 +134,7 @@ import { useState, useEffect } from 'react';
 import PlayerModal from './PlayerModal';
 import StatusIcon from './StatusIcon';
 
-export default function PredictedPointsTable({ myTeamPlayerIds = [] }) {
+export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick }) {
     const [allPlayers, setAllPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -393,7 +394,13 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [] }) {
                                             <StatusIcon status={player.status} news={player.news} />
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    <td 
+                                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 cursor-pointer hover:text-blue-600 hover:underline"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onTeamClick && onTeamClick(player.team_id);
+                                        }}
+                                    >
                                         {player.team}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
@@ -418,7 +425,13 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [] }) {
                                         {player.fixtures === 1 && player.fixtures}
                                         {player.fixtures === 0 && <span className="text-red-500">BGW</span>}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    <td 
+                                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 cursor-pointer hover:text-blue-600 hover:underline"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onTeamClick && onTeamClick(player.team_id);
+                                        }}
+                                    >
                                         {player.nailedness}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
@@ -456,6 +469,7 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [] }) {
                     teams={teams}
                     players={fullPlayersData}
                     onClose={handleCloseModal}
+                    onTeamClick={onTeamClick}
                 />
             )}
         </div>

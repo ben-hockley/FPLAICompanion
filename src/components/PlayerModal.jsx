@@ -7,7 +7,7 @@ import * as flags from 'country-flag-icons/react/3x2';
 // Custom SVG UK Flags.
 import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
 
-const PlayerModal = ({ player, teams, players = [], onClose }) => {
+const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
   const [playerDetails, setPlayerDetails] = useState(null);
   const [fixtures, setFixtures] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +67,7 @@ const PlayerModal = ({ player, teams, players = [], onClose }) => {
           const difficulty = isHome ? fixture.team_h_difficulty : fixture.team_a_difficulty;
           return {
             opponent: teams[opponentId] || 'TBD',
+            opponentId: opponentId,
             isHome,
             difficulty,
             gameweek: fixture.event
@@ -180,7 +181,7 @@ const PlayerModal = ({ player, teams, players = [], onClose }) => {
                 alt={`${player.first_name} ${player.second_name}`}
                 className="w-28 h-36 object-cover rounded-lg border-4 border-white shadow-lg bg-gray-100"
                 onError={(e) => {
-                  e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 140"%3E%3Crect fill="%23e5e7eb" width="110" height="140"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%236b7280" font-size="16"%3ENo Photo%3C/text%3E%3C/svg%3E';
+                  e.target.src = 'https://resources.premierleague.com/premierleague25/photos/players/110x140/placeholder.png';
                 }}
               />
             </div>
@@ -211,7 +212,15 @@ const PlayerModal = ({ player, teams, players = [], onClose }) => {
                 <StatusIcon status={player.status} news={player.news} className="w-5 h-5 text-xs" />
               </h2>
               <div className="flex flex-wrap gap-3 mb-3">
-                <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">
+                <span 
+                  onClick={() => {
+                    if (onTeamClick) {
+                      onClose();
+                      onTeamClick(player.team);
+                    }
+                  }}
+                  className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:bg-opacity-30 transition"
+                >
                   {teams[player.team]}
                 </span>
                 <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">
@@ -379,7 +388,15 @@ const PlayerModal = ({ player, teams, players = [], onClose }) => {
                 {fixtures.map((fixture, index) => (
                   <div key={index} className="bg-white border-2 border-gray-200 rounded-lg p-4 text-center">
                     <div className="text-xs text-gray-500 mb-2">GW {fixture.gameweek}</div>
-                    <div className="font-semibold text-gray-900 mb-2">
+                    <div 
+                      className="font-semibold text-gray-900 mb-2 cursor-pointer hover:text-blue-600 hover:underline"
+                      onClick={() => {
+                        if (onTeamClick) {
+                          onClose();
+                          onTeamClick(fixture.opponentId);
+                        }
+                      }}
+                    >
                       {fixture.isHome ? 'vs' : '@'} {fixture.opponent}
                     </div>
                     <div className="flex items-center justify-center gap-2">

@@ -7,7 +7,7 @@ import * as flags from 'country-flag-icons/react/3x2';
 import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
 import { TEAM_BADGES } from '../utils/teamBadges';
 
-const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
+const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
   const [managerId, setManagerId] = useState('');
   const [teamData, setTeamData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -761,7 +761,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
       )}
       
       {selectedPlayer && (
-        <PlayerModal player={selectedPlayer} teams={teams} players={allPlayers} onClose={handleCloseModal} />
+        <PlayerModal player={selectedPlayer} teams={teams} players={allPlayers} onClose={handleCloseModal} onTeamClick={onTeamClick} />
       )}
 
       {/* Transfer Recommendations Modal */}

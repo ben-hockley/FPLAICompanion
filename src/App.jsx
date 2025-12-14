@@ -4,6 +4,7 @@ import TeamFormation from './components/TeamFormation'
 import PredictedPointsTable from './components/PredictedPointsTable'
 import FixturesBar from './components/FixturesBar'
 import PlayerModal from './components/PlayerModal'
+import TeamModal from './components/TeamModal'
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -12,6 +13,7 @@ function App() {
   const [error, setError] = useState(null);
   const [myTeamPlayerIds, setMyTeamPlayerIds] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [selectedTeam, setSelectedTeam] = useState(null);
 
   useEffect(() => {
     fetchFPLData();
@@ -48,7 +50,13 @@ function App() {
   };
 
   const handlePlayerClick = (player) => {
+    setSelectedTeam(null); // Close team modal if open
     setSelectedPlayer(player);
+  };
+
+  const handleTeamClick = (teamId) => {
+    setSelectedPlayer(null); // Close player modal if open
+    setSelectedTeam(teamId);
   };
 
   if (loading) {
@@ -91,6 +99,7 @@ function App() {
           teams={teams} 
           allPlayers={players}
           onPlayerClick={handlePlayerClick}
+          onTeamClick={handleTeamClick}
         />
         
         {/* Two-column layout: side by side on large screens, stacked on small screens */}
@@ -102,6 +111,7 @@ function App() {
                 allPlayers={players} 
                 teams={teams} 
                 onTeamLoaded={handleTeamLoaded}
+                onTeamClick={handleTeamClick}
               />
             </div>
           </div>
@@ -113,6 +123,7 @@ function App() {
                 players={players} 
                 teams={teams} 
                 myTeamPlayerIds={myTeamPlayerIds}
+                onTeamClick={handleTeamClick}
               />
             </div>
           </div>
@@ -120,7 +131,7 @@ function App() {
 
         {/* Predicted Points Section - Full Width Below */}
         <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <PredictedPointsTable myTeamPlayerIds={myTeamPlayerIds} />
+          <PredictedPointsTable myTeamPlayerIds={myTeamPlayerIds} onTeamClick={handleTeamClick} />
         </div>
       </div>
       
@@ -131,6 +142,18 @@ function App() {
           teams={teams}
           players={players}
           onClose={() => setSelectedPlayer(null)}
+          onTeamClick={handleTeamClick}
+        />
+      )}
+      
+      {/* Team Modal */}
+      {selectedTeam && (
+        <TeamModal
+          teamId={selectedTeam}
+          teamName={teams[selectedTeam]}
+          allPlayers={players}
+          onClose={() => setSelectedTeam(null)}
+          onPlayerClick={handlePlayerClick}
         />
       )}
     </div>
