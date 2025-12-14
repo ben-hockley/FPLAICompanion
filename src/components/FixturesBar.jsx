@@ -4,7 +4,8 @@ import { TEAM_BADGES } from '../utils/teamBadges';
 
 const FixturesBar = ({ teams, allPlayers, onPlayerClick }) => {
   const [fixtures, setFixtures] = useState([]);
-  const [currentGameweek, setCurrentGameweek] = useState(null);
+  const [currentGameweek, setCurrentGameweek] = useState(null); // Actual current GW
+  const [displayedGameweek, setDisplayedGameweek] = useState(null); // GW being displayed
   const [loading, setLoading] = useState(true);
   const [selectedFixture, setSelectedFixture] = useState(null);
 
@@ -12,7 +13,7 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick }) => {
     fetchFixtures();
   }, []);
 
-  const fetchFixtures = async () => {
+  const fetchFixtures = async (gameweek = null) => {
     try {
       setLoading(true);
       
@@ -22,13 +23,17 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick }) => {
       const currentGW = bootstrapData.events.find(event => event.is_current)?.id || 15;
       setCurrentGameweek(currentGW);
       
+      // Use provided gameweek or default to current
+      const targetGW = gameweek || currentGW;
+      setDisplayedGameweek(targetGW);
+      
       // Fetch all fixtures
       const fixturesResponse = await fetch('/api/fixtures/');
       const fixturesData = await fixturesResponse.json();
       
-      // Filter fixtures for current gameweek and sort by kickoff time
+      // Filter fixtures for target gameweek and sort by kickoff time
       const gwFixtures = fixturesData
-        .filter(fixture => fixture.event === currentGW)
+        .filter(fixture => fixture.event === targetGW)
         .sort((a, b) => new Date(a.kickoff_time) - new Date(b.kickoff_time));
       
       setFixtures(gwFixtures);
@@ -37,6 +42,22 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick }) => {
       console.error('Failed to fetch fixtures:', err);
       setLoading(false);
     }
+  };
+
+  const goToPreviousGameweek = () => {
+    if (displayedGameweek > 1) {
+      fetchFixtures(displayedGameweek - 1);
+    }
+  };
+
+  const goToNextGameweek = () => {
+    if (displayedGameweek < 38) {
+      fetchFixtures(displayedGameweek + 1);
+    }
+  };
+
+  const goToCurrentGameweek = () => {
+    fetchFixtures(currentGameweek);
   };
 
   const formatKickoffTime = (kickoffTime) => {
@@ -87,9 +108,70 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
-        Gameweek {currentGameweek} Fixtures
-      </h2>
+      <div className="flex items-center justify-center gap-3 mb-4">
+        {/* Previous Gameweek Button */}
+        {displayedGameweek > 1 && (
+          <button
+            onClick={goToPreviousGameweek}
+            disabled={loading}
+            className="bg-white rounded-lg shadow-md p-2 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Previous gameweek"
+          >
+            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        )}
+
+        {/* Jump to Current Gameweek (left side - when viewing future) */}
+        {displayedGameweek > currentGameweek && (
+          <button
+            onClick={goToCurrentGameweek}
+            disabled={loading}
+            className="bg-blue-600 text-white rounded-lg shadow-md px-3 py-2 hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+            title="Go to current gameweek"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+            <span className="text-xs font-medium">Current</span>
+          </button>
+        )}
+
+        {/* Title */}
+        <h2 className="text-xl font-bold text-gray-800">
+          Gameweek {displayedGameweek} Fixtures
+        </h2>
+
+        {/* Jump to Current Gameweek (right side - when viewing past) */}
+        {displayedGameweek < currentGameweek && (
+          <button
+            onClick={goToCurrentGameweek}
+            disabled={loading}
+            className="bg-blue-600 text-white rounded-lg shadow-md px-3 py-2 hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+            title="Go to current gameweek"
+          >
+            <span className="text-xs font-medium">Current</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+
+        {/* Next Gameweek Button */}
+        {displayedGameweek < 38 && (
+          <button
+            onClick={goToNextGameweek}
+            disabled={loading}
+            className="bg-white rounded-lg shadow-md p-2 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Next gameweek"
+          >
+            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+      </div>
       
       <div className="overflow-x-auto">
         <div className="flex gap-3 pb-2 justify-around" style={{ minWidth: 'min-content' }}>
