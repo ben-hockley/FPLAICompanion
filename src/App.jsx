@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import PlayerTable from './components/PlayerTable'
 import TeamFormation from './components/TeamFormation'
 import PredictedPointsTable from './components/PredictedPointsTable'
+import FixturesBar from './components/FixturesBar'
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -78,6 +79,9 @@ function App() {
         <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
           FPL AI Companion
         </h1>
+        
+        {/* Fixtures Bar */}
+        <FixturesBar teams={teams} />
         
         {/* Two-column layout: side by side on large screens, stacked on small screens */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">

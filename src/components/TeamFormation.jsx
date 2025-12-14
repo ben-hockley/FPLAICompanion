@@ -2,6 +2,9 @@ import { useState } from 'react';
 import PlayerModal from './PlayerModal';
 import StatusIcon from './StatusIcon';
 import TransferRecommendations from './TransferRecommendations';
+import { getCountryCode } from '../utils/regionFlags';
+import * as flags from 'country-flag-icons/react/3x2';
+import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
 
 const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
   const [managerId, setManagerId] = useState('');
@@ -12,6 +15,8 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
   const [showTransferRecs, setShowTransferRecs] = useState(false);
   const [currentGameweek, setCurrentGameweek] = useState(15);
   const [showHelp, setShowHelp] = useState(false);
+  const [managerInfo, setManagerInfo] = useState(null);
+  const [loadedManagerId, setLoadedManagerId] = useState(null);
 
   const CURRENT_GAMEWEEK = 15;
 
@@ -20,6 +25,30 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
     2: 'DEF',
     3: 'MID',
     4: 'FWD'
+  };
+
+  const getTeamBadgeUrl = (teamId) => {
+    return `https://resources.premierleague.com/premierleague25/badges/${teamId}.svg`;
+  };
+
+  const renderFlag = (regionId) => {
+    const countryCode = getCountryCode(regionId);
+    if (!countryCode) return null;
+
+    // Handle UK countries with custom flags
+    if (countryCode === 'ENG') {
+      return <EnglandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+    } else if (countryCode === 'SCT') {
+      return <ScotlandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+    } else if (countryCode === 'WLS') {
+      return <WalesFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+    } else if (countryCode === 'NIR') {
+      return <NorthernIrelandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+    } else {
+      // Use country-flag-icons for other countries
+      const FlagComponent = flags[countryCode];
+      return FlagComponent ? <FlagComponent className="w-6 h-4 inline-block rounded shadow-sm" title={countryCode} /> : null;
+    }
   };
 
   
@@ -33,6 +62,25 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
     try {
       setLoading(true);
       setError(null);
+      
+      // Fetch manager info if manager ID has changed
+      if (loadedManagerId !== managerId) {
+        try {
+          const managerResponse = await fetch(`/api/entry/${managerId}/`);
+          if (managerResponse.ok) {
+            const managerData = await managerResponse.json();
+            setManagerInfo({
+              name: managerData.player_first_name + ' ' + managerData.player_last_name,
+              teamName: managerData.name,
+              region: managerData.player_region_id,
+              favouriteTeam: managerData.favourite_team
+            });
+            setLoadedManagerId(managerId);
+          }
+        } catch (err) {
+          console.error('Failed to fetch manager info:', err);
+        }
+      }
       
       const response = await fetch(`/api/entry/${managerId}/event/${gameweek}/picks/`);
       
@@ -118,6 +166,8 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
     setTeamData(null);
     setManagerId('');
     setError(null);
+    setManagerInfo(null);
+    setLoadedManagerId(null);
   };
 
   const getPlayersByPosition = (picks, positionType) => {
@@ -255,6 +305,19 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
       {/* Team Formation Display */}
       {teamData && (
         <div className="max-w-5xl mx-auto">
+          {/* Manager and Team Name */}
+          {managerInfo && (
+            <div className="text-center mb-6 bg-white rounded-lg shadow-md p-4">
+              <h3 className="text-2xl font-bold text-gray-800 flex items-center justify-center gap-2">
+                {managerInfo.teamName}
+              </h3>
+              <p className="text-gray-600 mt-1 flex items-center justify-center gap-2">
+                {managerInfo.region && renderFlag(managerInfo.region)}
+                <span>Manager: {managerInfo.name}</span>
+              </p>
+            </div>
+          )}
+          
           {/* Total Points with Gameweek Navigation */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-3">
