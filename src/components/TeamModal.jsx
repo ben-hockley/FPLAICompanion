@@ -104,7 +104,7 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
 
   const getDisplayName = (player) => {
     const fullName = `${player.first_name} ${player.second_name}`;
-    return fullName.length <= 15 ? fullName : player.web_name;
+    return fullName.length <= 20 ? fullName : player.web_name;
   };
 
   const formatKickoffTime = (kickoffTime) => {
