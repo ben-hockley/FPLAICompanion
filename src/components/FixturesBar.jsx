@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import FixtureModal from './FixtureModal';
+import { TEAM_BADGES } from '../utils/teamBadges';
 
-const FixturesBar = ({ teams }) => {
+const FixturesBar = ({ teams, allPlayers, onPlayerClick }) => {
   const [fixtures, setFixtures] = useState([]);
   const [currentGameweek, setCurrentGameweek] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedFixture, setSelectedFixture] = useState(null);
 
   useEffect(() => {
     fetchFixtures();
@@ -55,7 +58,8 @@ const FixturesBar = ({ teams }) => {
   };
 
   const getTeamBadgeUrl = (teamId) => {
-    return `https://resources.premierleague.com/premierleague/badges/50/t${teamId}.png`;
+    // Prefer explicit map entry, fall back to CDN template with 50px badges
+    return TEAM_BADGES[teamId] ? TEAM_BADGES[teamId].replace('/badges/70/', '/badges/50/') : null;
   };
 
   const getDifficultyColor = (difficulty) => {
@@ -92,8 +96,9 @@ const FixturesBar = ({ teams }) => {
           {fixtures.map((fixture) => (
             <div
               key={fixture.id}
-              className={`flex-shrink-0 border-2 rounded-lg p-3 min-w-[200px] ${
-                fixture.finished ? 'bg-gray-50 border-gray-300' : 'bg-white border-blue-200'
+              onClick={() => setSelectedFixture(fixture)}
+              className={`flex-shrink-0 border-2 rounded-lg p-3 min-w-[200px] cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${
+                fixture.finished ? 'bg-gray-50 border-gray-300 hover:border-gray-400' : 'bg-white border-blue-200 hover:border-blue-400'
               }`}
             >
               {/* Teams */}
@@ -101,12 +106,12 @@ const FixturesBar = ({ teams }) => {
                 {/* Home Team */}
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    {/*<img
+                    <img
                       src={getTeamBadgeUrl(fixture.team_h)}
                       alt={teams[fixture.team_h]}
                       className="w-6 h-6 object-contain flex-shrink-0"
                       onError={(e) => e.target.style.display = 'none'}
-                    />*/}
+                    />
                     <span className="text-sm font-semibold text-gray-800 truncate">
                       {teams[fixture.team_h]}
                     </span>
@@ -121,13 +126,12 @@ const FixturesBar = ({ teams }) => {
                 {/* Away Team */}
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    {/*}
                     <img
                       src={getTeamBadgeUrl(fixture.team_a)}
                       alt={teams[fixture.team_a]}
                       className="w-6 h-6 object-contain flex-shrink-0"
                       onError={(e) => e.target.style.display = 'none'}
-                    />*/}
+                    />
                     <span className="text-sm font-semibold text-gray-800 truncate">
                       {teams[fixture.team_a]}
                     </span>
@@ -156,6 +160,17 @@ const FixturesBar = ({ teams }) => {
           ))}
         </div>
       </div>
+      
+      {/* Fixture Modal */}
+      {selectedFixture && (
+        <FixtureModal
+          fixture={selectedFixture}
+          teams={teams}
+          allPlayers={allPlayers}
+          onClose={() => setSelectedFixture(null)}
+          onPlayerClick={onPlayerClick}
+        />
+      )}
     </div>
   );
 };

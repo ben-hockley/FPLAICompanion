@@ -5,6 +5,7 @@ import TransferRecommendations from './TransferRecommendations';
 import { getCountryCode } from '../utils/regionFlags';
 import * as flags from 'country-flag-icons/react/3x2';
 import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
+import { TEAM_BADGES } from '../utils/teamBadges';
 
 const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
   const [managerId, setManagerId] = useState('');
@@ -28,7 +29,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded }) => {
   };
 
   const getTeamBadgeUrl = (teamId) => {
-    return `https://resources.premierleague.com/premierleague25/badges/${teamId}.svg`;
+    return TEAM_BADGES[teamId];
   };
 
   const renderFlag = (regionId) => {

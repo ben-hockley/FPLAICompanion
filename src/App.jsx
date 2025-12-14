@@ -3,6 +3,7 @@ import PlayerTable from './components/PlayerTable'
 import TeamFormation from './components/TeamFormation'
 import PredictedPointsTable from './components/PredictedPointsTable'
 import FixturesBar from './components/FixturesBar'
+import PlayerModal from './components/PlayerModal'
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -10,6 +11,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [myTeamPlayerIds, setMyTeamPlayerIds] = useState([]);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   useEffect(() => {
     fetchFPLData();
@@ -43,6 +45,10 @@ function App() {
 
   const handleTeamLoaded = (playerIds) => {
     setMyTeamPlayerIds(playerIds);
+  };
+
+  const handlePlayerClick = (player) => {
+    setSelectedPlayer(player);
   };
 
   if (loading) {
@@ -81,7 +87,11 @@ function App() {
         </h1>
         
         {/* Fixtures Bar */}
-        <FixturesBar teams={teams} />
+        <FixturesBar 
+          teams={teams} 
+          allPlayers={players}
+          onPlayerClick={handlePlayerClick}
+        />
         
         {/* Two-column layout: side by side on large screens, stacked on small screens */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
@@ -113,6 +123,16 @@ function App() {
           <PredictedPointsTable myTeamPlayerIds={myTeamPlayerIds} />
         </div>
       </div>
+      
+      {/* Player Modal */}
+      {selectedPlayer && (
+        <PlayerModal
+          player={selectedPlayer}
+          teams={teams}
+          players={players}
+          onClose={() => setSelectedPlayer(null)}
+        />
+      )}
     </div>
   )
 }
