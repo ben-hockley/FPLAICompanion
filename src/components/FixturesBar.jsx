@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import FixtureModal from './FixtureModal';
+import LeagueTableModal from './LeagueTableModal';
 import { TEAM_BADGES } from '../utils/teamBadges';
 
 const FixturesBar = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
@@ -8,6 +9,7 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
   const [displayedGameweek, setDisplayedGameweek] = useState(null); // GW being displayed
   const [loading, setLoading] = useState(true);
   const [selectedFixture, setSelectedFixture] = useState(null);
+  const [showLeagueTable, setShowLeagueTable] = useState(false);
 
   useEffect(() => {
     fetchFixtures();
@@ -108,6 +110,19 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
+      {/* League Table Button */}
+      <div className="flex justify-end mb-3">
+        <button
+          onClick={() => setShowLeagueTable(true)}
+          className="bg-purple-600 text-white rounded-lg shadow-md px-4 py-2 hover:bg-purple-700 transition flex items-center gap-2 font-medium"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          League Table
+        </button>
+      </div>
+
       <div className="flex items-center justify-center gap-3 mb-4">
         {/* Previous Gameweek Button */}
         {displayedGameweek > 1 && (
@@ -263,6 +278,15 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
           allPlayers={allPlayers}
           onClose={() => setSelectedFixture(null)}
           onPlayerClick={onPlayerClick}
+          onTeamClick={onTeamClick}
+        />
+      )}
+
+      {/* League Table Modal */}
+      {showLeagueTable && (
+        <LeagueTableModal
+          teams={teams}
+          onClose={() => setShowLeagueTable(false)}
           onTeamClick={onTeamClick}
         />
       )}

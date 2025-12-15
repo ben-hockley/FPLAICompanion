@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { TEAM_BADGES } from '../utils/teamBadges';
+import { getTeamWebsite } from '../utils/teamWebsites';
 import StatusIcon from './StatusIcon';
 import FixtureModal from './FixtureModal';
+import LeagueTableModal from './LeagueTableModal';
 import { getCountryCode } from '../utils/regionFlags';
 import * as flags from 'country-flag-icons/react/3x2';
 import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
@@ -13,11 +15,14 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
   const [teams, setTeams] = useState({});
   const [loadingFixtures, setLoadingFixtures] = useState(true);
   const [selectedFixture, setSelectedFixture] = useState(null);
+  const [leaguePosition, setLeaguePosition] = useState(null);
+  const [showLeagueTable, setShowLeagueTable] = useState(false);
 
   useEffect(() => {
     if (teamId && allPlayers) {
       loadTeamSquad();
       loadTeamFixtures();
+      calculateLeaguePosition();
     }
   }, [teamId, allPlayers]);
 
@@ -37,6 +42,79 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
     
     setTeamPlayers(sorted);
     setLoading(false);
+  };
+
+  const calculateLeaguePosition = async () => {
+    try {
+      // Fetch all fixtures
+      const response = await fetch('/api/fixtures/');
+      const fixtures = await response.json();
+
+      // Fetch teams for names
+      const bootstrapResponse = await fetch('/api/bootstrap-static/');
+      const bootstrapData = await bootstrapResponse.json();
+      
+      const teamMap = {};
+      bootstrapData.teams.forEach(team => {
+        teamMap[team.id] = team.name;
+      });
+
+      // Initialize table data for each team
+      const table = {};
+      Object.keys(teamMap).forEach(tid => {
+        table[tid] = {
+          teamId: parseInt(tid),
+          played: 0,
+          points: 0,
+          goalsFor: 0,
+          goalsAgainst: 0,
+          goalDifference: 0
+        };
+      });
+
+      // Process finished fixtures only
+      const finishedFixtures = fixtures.filter(f => f.finished);
+      
+      finishedFixtures.forEach(fixture => {
+        const homeTeam = table[fixture.team_h];
+        const awayTeam = table[fixture.team_a];
+
+        if (!homeTeam || !awayTeam) return;
+
+        homeTeam.played++;
+        awayTeam.played++;
+        homeTeam.goalsFor += fixture.team_h_score;
+        homeTeam.goalsAgainst += fixture.team_a_score;
+        awayTeam.goalsFor += fixture.team_a_score;
+        awayTeam.goalsAgainst += fixture.team_h_score;
+
+        if (fixture.team_h_score > fixture.team_a_score) {
+          homeTeam.points += 3;
+        } else if (fixture.team_h_score < fixture.team_a_score) {
+          awayTeam.points += 3;
+        } else {
+          homeTeam.points++;
+          awayTeam.points++;
+        }
+
+        homeTeam.goalDifference = homeTeam.goalsFor - homeTeam.goalsAgainst;
+        awayTeam.goalDifference = awayTeam.goalsFor - awayTeam.goalsAgainst;
+      });
+
+      // Sort teams by league position
+      const sortedTable = Object.values(table).sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+        if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+        return a.teamId - b.teamId;
+      });
+
+      // Find position of current team
+      const position = sortedTable.findIndex(team => team.teamId === teamId) + 1;
+      setLeaguePosition(position);
+    } catch (error) {
+      console.error('Error calculating league position:', error);
+    }
   };
 
   const loadTeamFixtures = async () => {
@@ -175,24 +253,61 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {getTeamBadgeUrl(teamId) && (
-              <img
-                src={getTeamBadgeUrl(teamId)}
-                alt={teamName}
-                className="w-12 h-12 object-contain"
-                onError={(e) => e.target.style.display = 'none'}
-              />
-            )}
-            <h2 className="text-2xl font-bold">{teamName}</h2>
+        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-4">
+              {getTeamBadgeUrl(teamId) && (
+                <img
+                  src={getTeamBadgeUrl(teamId)}
+                  alt={teamName}
+                  className="w-12 h-12 object-contain"
+                  onError={(e) => e.target.style.display = 'none'}
+                />
+              )}
+              <div>
+                <h2 className="text-2xl font-bold">{teamName}</h2>
+                {leaguePosition && (
+                  <p className="text-sm text-blue-100 mt-1">
+                    League Position: {leaguePosition}{leaguePosition === 1 ? 'st' : leaguePosition === 2 ? 'nd' : leaguePosition === 3 ? 'rd' : 'th'}
+                  </p>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-gray-200 text-3xl leading-none"
+            >
+              ×
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="text-white hover:text-gray-200 text-3xl leading-none"
-          >
-            ×
-          </button>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setShowLeagueTable(true)}
+              className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg px-3 py-1.5 text-sm font-medium transition flex items-center gap-1.5"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              View League Table
+            </button>
+            
+            {getTeamWebsite(teamId) && (
+              <a
+                href={getTeamWebsite(teamId)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg px-3 py-1.5 text-sm font-medium transition flex items-center gap-1.5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+                Official Website
+              </a>
+            )}
+          </div>
         </div>
 
         {/* Fixtures Section */}
@@ -321,6 +436,22 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
             setSelectedFixture(null); // Close fixture modal
             onClose(); // Close current team modal
             onTeamClick && onTeamClick(newTeamId); // Open new team modal
+          }}
+        />
+      )}
+
+      {/* League Table Modal */}
+      {showLeagueTable && (
+        <LeagueTableModal
+          teams={teams}
+          onClose={() => {
+            setShowLeagueTable(false);
+            onClose(); // Close team modal when league table closes
+          }}
+          onTeamClick={(newTeamId) => {
+            setShowLeagueTable(false);
+            onClose();
+            onTeamClick && onTeamClick(newTeamId);
           }}
         />
       )}
