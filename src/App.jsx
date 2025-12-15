@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import PlayerTable from './components/PlayerTable'
-import TeamFormation from './components/TeamFormation'
-import PredictedPointsTable from './components/PredictedPointsTable'
-import FixturesBar from './components/FixturesBar'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import Navbar from './components/Navbar'
+import Home from './pages/Home'
+import PredictedPoints from './pages/PredictedPoints'
+import LeagueTable from './pages/LeagueTable'
 import PlayerModal from './components/PlayerModal'
 import TeamModal from './components/TeamModal'
 
@@ -88,76 +89,69 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
-      <div className="max-w-full mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
-          FPL AI Companion
-        </h1>
+    <Router>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Navbar />
         
-        {/* Fixtures Bar */}
-        <FixturesBar 
-          teams={teams} 
-          allPlayers={players}
-          onPlayerClick={handlePlayerClick}
-          onTeamClick={handleTeamClick}
-        />
-        
-        {/* Two-column layout: side by side on large screens, stacked on small screens */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
-          {/* Left Box: My Team Formation */}
-          <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col w-full max-h-[calc(100vh-8rem)]">
-            <div className="flex-1 min-h-0 overflow-auto">
-              <TeamFormation 
-                allPlayers={players} 
-                teams={teams} 
+        <Routes>
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route 
+            path="/home" 
+            element={
+              <Home 
+                players={players}
+                teams={teams}
+                myTeamPlayerIds={myTeamPlayerIds}
                 onTeamLoaded={handleTeamLoaded}
+                onPlayerClick={handlePlayerClick}
                 onTeamClick={handleTeamClick}
               />
-            </div>
-          </div>
-
-          {/* Right Box: Player Stats Table */}
-          <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col w-full max-h-[calc(100vh-8rem)]">
-            <div className="flex-1 min-h-0 overflow-auto">
-              <PlayerTable 
-                players={players} 
-                teams={teams} 
+            } 
+          />
+          <Route 
+            path="/predicted-points" 
+            element={
+              <PredictedPoints 
                 myTeamPlayerIds={myTeamPlayerIds}
                 onTeamClick={handleTeamClick}
               />
-            </div>
-          </div>
-        </div>
-
-        {/* Predicted Points Section - Full Width Below */}
-        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <PredictedPointsTable myTeamPlayerIds={myTeamPlayerIds} onTeamClick={handleTeamClick} />
-        </div>
+            } 
+          />
+          <Route 
+            path="/league-table" 
+            element={
+              <LeagueTable 
+                teams={teams}
+                onTeamClick={handleTeamClick}
+              />
+            } 
+          />
+        </Routes>
+        
+        {/* Player Modal */}
+        {selectedPlayer && (
+          <PlayerModal
+            player={selectedPlayer}
+            teams={teams}
+            players={players}
+            onClose={() => setSelectedPlayer(null)}
+            onTeamClick={handleTeamClick}
+          />
+        )}
+        
+        {/* Team Modal */}
+        {selectedTeam && (
+          <TeamModal
+            teamId={selectedTeam}
+            teamName={teams[selectedTeam]}
+            allPlayers={players}
+            onClose={() => setSelectedTeam(null)}
+            onPlayerClick={handlePlayerClick}
+            onTeamClick={handleTeamClick}
+          />
+        )}
       </div>
-      
-      {/* Player Modal */}
-      {selectedPlayer && (
-        <PlayerModal
-          player={selectedPlayer}
-          teams={teams}
-          players={players}
-          onClose={() => setSelectedPlayer(null)}
-          onTeamClick={handleTeamClick}
-        />
-      )}
-      
-      {/* Team Modal */}
-      {selectedTeam && (
-        <TeamModal
-          teamId={selectedTeam}
-          teamName={teams[selectedTeam]}
-          allPlayers={players}
-          onClose={() => setSelectedTeam(null)}
-          onPlayerClick={handlePlayerClick}
-          onTeamClick={handleTeamClick}
-        />
-      )}
-    </div>
+    </Router>
   )
 }
 
