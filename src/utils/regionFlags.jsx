@@ -61,6 +61,7 @@ export const REGION_TO_COUNTRY_CODE = {
   230: 'UY', // Uruguay
   231: 'UZ', // Uzbekistan
   239: 'ZW', // Zimbabwe
+  // UK Flags (Mapped to custom svgs as country-flag-icons doesn't have separate UK flags)
   241: 'ENG', // England
   242: 'NIR', // Northern Ireland
   243: 'SCT', // Scotland

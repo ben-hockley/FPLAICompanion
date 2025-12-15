@@ -204,8 +204,15 @@ Project Link: [https://github.com/ben-hockley/FPLAICompanion](https://github.com
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
+### Resources Used
+
 * [Fantasy Premier League + Their API](https://fantasy.premierleague.com/)
 * [Best-README-Template by othneilDrew](https://github.com/othneildrew/Best-README-Template)
+* [Best-README-Template by othneilDrew](https://github.com/othneildrew/Best-README-Template)
+* [Country-flag-icons npm package](https://www.npmjs.com/package/country-flag-icons)
+
+### Useful Learning Resources
+
 * [FPL APIs explained by Oliver Looney](https://www.oliverlooney.com/blogs/FPL-APIs-Explained)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
