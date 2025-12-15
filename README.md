@@ -1,110 +1,256 @@
-# FPL AI Companion
+<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+<a id="readme-top"></a>
+<!-- Built using Best-README-Template by othneilDrew : https://github.com/othneildrew/Best-README-Template-->
 
-A React + Vite app that displays Fantasy Premier League player data in an interactive, sortable table, provides detailed player modals, and shows your FPL team in a football formation.
 
-## Features
 
-- **Live FPL Data**: Fetches real-time player statistics from the official FPL API via a dev proxy.
-- **Sortable Columns**: Click any column header to sort ascending/descending.
-- **Scrollable Table**: Fixed header with scrollable body for easy navigation.
-- **Clickable Rows & Player Modal**: Click a player row to open a detailed modal with season stats, match history, and a recent form chart.
-- **My Team Formation View**: Enter your FPL Manager ID to see your team displayed in a football formation with substitutes bench.
-- **Responsive UI**: Built with Tailwind CSS, responsive and mobile-friendly.
-- **Loading & Error States**: Shows loading spinners and retry options for both the main list and modal details.
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![project_license][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
-## What the Modal Shows
 
-- **Header**: Player photo, full name, team, position, price, total points, and ICT index.
-- **Season Stats**: Form, points/game, minutes, bonus, goals, assists, clean sheets, goals conceded.
-- **Match History**: Scrollable table with Gameweek, Opponent (H/A), Points, Minutes, Goals, Assists, Clean Sheets, Bonus.
-- **Recent Form Chart**: Line chart for the last 5 games (uses `recharts`).
 
-## My Team Feature
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/ben-hockley/FPLAICompanion">
+    <img src="https://www.foottheball.com/wp-content/uploads/2021/01/fpl.jpg" alt="Logo" width="200" height="200">
+  </a>
 
-- **Manager ID Input**: Enter your FPL Manager ID (find it in the FPL app under "Points")
-- **Formation Display**: See your team arranged in a football formation on a pitch-like background
-- **Player Cards**: Color-coded by position (GK=yellow, DEF=green, MID=blue, FWD=red)
-- **Captain & Vice-Captain**: Clearly marked with (C) and (VC) badges
-- **Substitutes Bench**: View your 4 substitutes below the formation
-- **Team Stats**: See team value, money in bank, gameweek rank, and overall rank
-- **Gameweek Points**: Total points including captain double points
+<h3 align="center">FPL AI Companion</h3>
 
+  <p align="center">
+    A Fantasy Premier League companion that helps managers make better decisions to help them top their leagues.
+    <br />
+    <a href="https://github.com/ben-hockley/FPLAICompanion/wiki"><strong>Explore the docs »</strong></a>
+    <br />
+    <!--
+    <br />
+    <a href="">View Demo</a>
+    &middot;
+    <a href="https://github.com/ben-hockley/FPLAICompanion/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    &middot;
+    <a href="https://github.com/ben-hockley/FPLAICompanion/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    -->
+  </p>
+</div>
+
+
+
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
+
+
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+This is an AI Powered Fantasy Premier League companion, that helps users make better decisions in fantasy premier league.
+
+[![Product Name Screen Shot][product-screenshot]](https://example.com)
+
+<!-- TODO: Fix this project license : `project_license` -->
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+### Built With
+
+* [![React][React.js]][React-url]
+* [![Node][Node.js]][Node-url]
+* [![Tailwind][Angular.io]][Angular-url]
+* [![Svelte][Svelte.dev]][Svelte-url]
+* [![Laravel][Laravel.com]][Laravel-url]
+* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
+* [![JQuery][JQuery.com]][JQuery-url]
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- GETTING STARTED -->
 ## Getting Started
+
+This is an example of how you may give instructions on setting up your project locally.
+To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm
+This is an example of how to list things you need to use the software and how to install them.
+* npm
+  ```sh
+  npm install npm@latest -g
+  ```
 
 ### Installation
 
-1. Clone the repository
-2. Install dependencies:
+1. Get a free API Key at [https://example.com](https://example.com)
+2. Clone the repo
+   ```sh
+   git clone https://github.com/ben-hockley/FPLAICompanion.git
+   ```
+3. Install NPM packages
+   ```sh
+   npm install
+   ```
+4. Enter your API in `config.js`
+   ```js
+   const API_KEY = 'ENTER YOUR API';
+   ```
+5. Change git remote url to avoid accidental pushes to base project
+   ```sh
+   git remote set-url origin ben-hockley/FPLAICompanion
+   git remote -v # confirm the changes
+   ```
 
-```powershell
-npm install
-```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Development Server
 
-Start the dev server:
 
-```powershell
-npm run dev
-```
-
-Open `http://localhost:5173/` in your browser.
-
-Note: The app uses a Vite dev proxy so client requests to `/api/*` are forwarded to `https://fantasy.premierleague.com`. This avoids CORS during development. If you change `vite.config.js`, restart the dev server.
-
-### Build & Preview
-
-```powershell
-npm run build
-npm run preview
-```
-
-## Dependencies & Libraries
-
-- **React**
-- **Vite**
-- **Tailwind CSS**
-- **Recharts** — used for the recent form chart inside the player modal
-
-## Project Structure (important files)
-
-```text
-FPLAICompanion/
-├── src/
-│   ├── components/
-│   │   ├── PlayerTable.jsx    # Main table component (sortable, clickable rows)
-│   │   ├── PlayerModal.jsx    # Modal that fetches and shows detailed player data
-│   │   └── TeamFormation.jsx  # My Team formation view component
-│   ├── App.jsx                # Root component
-│   ├── main.jsx               # Entry point
-│   └── index.css              # Tailwind imports + small custom animations
-├── index.html
-├── package.json
-├── vite.config.js             # Includes `/api` dev proxy to FPL API
-└── tailwind.config.js
-```
-
-## API Endpoints Used
-
-- Bootstrap data (players & teams): `/api/bootstrap-static/` (proxied to `https://fantasy.premierleague.com/api/bootstrap-static/`)
-- Player details (history): `/api/element-summary/{element_id}/` (proxied)
-- Team picks: `/api/entry/{manager_id}/event/{event_id}/picks/` (proxied)
-
+<!-- USAGE EXAMPLES -->
 ## Usage
 
-- Click any row in the players table to open a modal with detailed stats and match history.
-- Close modal with the X button, by clicking outside the modal, or pressing `Escape`.
-- Scroll down to "My Team" section and enter your FPL Manager ID to see your team formation.
-- Your Manager ID can be found in the FPL app or website under "Points" or in the URL when viewing your team.
+Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
 
-## Troubleshooting
+_For more examples, please refer to the [Documentation](https://example.com)_
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+
+<!-- ROADMAP -->
+## Roadmap
+
+- [ ] Feature 1
+- [ ] Feature 2
+- [ ] Feature 3
+    - [ ] Nested Feature
+
+See the [open issues](https://github.com/ben-hockley/FPLAICompanion/issues) for a full list of proposed features (and known issues).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Top contributors:
+
+<a href="https://github.com/ben-hockley/FPLAICompanion/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ben-hockley/FPLAICompanion" alt="contrib.rocks image" />
+</a>
+
+
+
+<!-- LICENSE -->
 ## License
 
-IN PROGRESS
+Distributed under the project_license. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- CONTACT -->
+## Contact
+
+Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - hockleyben4@gmail.com
+
+Project Link: [https://github.com/ben-hockley/FPLAICompanion](https://github.com/ben-hockley/FPLAICompanion)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- ACKNOWLEDGMENTS -->
+## Acknowledgments
+
+* []()
+* []()
+* []()
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/ben-hockley/FPLAICompanion.svg?style=for-the-badge
+[contributors-url]: https://github.com/ben-hockley/FPLAICompanion/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/ben-hockley/FPLAICompanion.svg?style=for-the-badge
+[forks-url]: https://github.com/ben-hockley/FPLAICompanion/network/members
+[stars-shield]: https://img.shields.io/github/stars/ben-hockley/FPLAICompanion.svg?style=for-the-badge
+[stars-url]: https://github.com/ben-hockley/FPLAICompanion/stargazers
+[issues-shield]: https://img.shields.io/github/issues/ben-hockley/FPLAICompanion.svg?style=for-the-badge
+[issues-url]: https://github.com/ben-hockley/FPLAICompanion/issues
+[license-shield]: https://img.shields.io/github/license/ben-hockley/FPLAICompanion.svg?style=for-the-badge
+[license-url]: https://github.com/ben-hockley/FPLAICompanion/blob/master/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/benjamin-hockley
+[product-screenshot]: images/screenshot.png
+<!-- Shields.io badges. You can a comprehensive list with many more badges at: https://github.com/inttter/md-badges -->
+[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+[Next-url]: https://nextjs.org/
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
+[Vue-url]: https://vuejs.org/
+[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
+[Angular-url]: https://angular.io/
+[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
+[Svelte-url]: https://svelte.dev/
+[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
+[Laravel-url]: https://laravel.com
+[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
+[Bootstrap-url]: https://getbootstrap.com
+[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
+[JQuery-url]: https://jquery.com 
