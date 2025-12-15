@@ -37,7 +37,6 @@
     <br />
     <!--
     <br />
-    <a href="">View Demo</a>
     &middot;
     <a href="https://github.com/ben-hockley/FPLAICompanion/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
@@ -144,7 +143,7 @@ For developers: to set up and run the application on your local device follow th
 
 FPL AI Companion is a web app for analysing fpl players to make the best choices, helping users to maximise their points and reach higher ranks in the FPL Standings.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+_For more examples, please refer to the [Documentation](https://github.com/ben-hockley/FPLAICompanion/wiki)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
