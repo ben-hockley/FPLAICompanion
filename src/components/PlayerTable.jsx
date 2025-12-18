@@ -210,7 +210,7 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-blue-600 text-white sticky top-0">
               <tr>
-                <th 
+                <th
                   onClick={() => handleSort('web_name')}
                   className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                 >
@@ -313,7 +313,8 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {player.selected_by_percent}%
-                  </td>                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div className="flex items-center gap-1">
                       {player.penalties_order === 1 && (
                         <span 
@@ -343,7 +344,8 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
                         </span>
                       )}
                     </div>
-                  </td>                </tr>
+                  </td>
+                </tr>
               );
               })}
             </tbody>

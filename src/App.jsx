@@ -98,7 +98,7 @@ function App() {
           <Route 
             path="/home" 
             element={
-              <Home 
+              <Home
                 players={players}
                 teams={teams}
                 myTeamPlayerIds={myTeamPlayerIds}
