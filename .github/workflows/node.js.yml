@@ -28,7 +28,7 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build --if-present
-    - run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov
+    - run: npm test -- --coverage --coverageReporters=text --coverageReporters=json-summary --coverageReporters=lcov
     
     - name: Upload coverage reports
       if: matrix.node-version == '22.x'
@@ -37,20 +37,23 @@ jobs:
         name: coverage-report
         path: coverage/
     
+    - name: Extract coverage percentage
+      if: matrix.node-version == '22.x' && github.ref == 'refs/heads/main'
+      id: coverage
+      run: |
+        COVERAGE=$(node -p "Math.floor(JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.lines.pct)")
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+        echo "Coverage: $COVERAGE%"
+    
     - name: Generate coverage badge
       if: matrix.node-version == '22.x' && github.ref == 'refs/heads/main'
-      uses: cicirello/jacoco-badge-generator@v2
+      uses: schneegans/dynamic-badges-action@v1.7.0
       with:
-        badges-directory: .github/badges
-        generate-coverage-badge: true
-        coverage-badge-filename: coverage.svg
-        jacoco-csv-file: coverage/lcov.info
-    
-    - name: Commit coverage badge
-      if: matrix.node-version == '22.x' && github.ref == 'refs/heads/main'
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        git add .github/badges/coverage.svg || true
-        git diff --staged --quiet || git commit -m "Update coverage badge [skip ci]"
-        git push || true
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: ${{ secrets.GIST_ID }}
+        filename: fplaicompanion-coverage.json
+        label: coverage
+        message: ${{ steps.coverage.outputs.percentage }}%
+        valColorRange: ${{ steps.coverage.outputs.percentage }}
+        maxColorRange: 100
+        minColorRange: 0
