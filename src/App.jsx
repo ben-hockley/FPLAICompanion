@@ -6,6 +6,7 @@ import Home from './pages/Home'
 import MyTeam from './pages/MyTeam'
 import PlayerStats from './pages/PlayerStats'
 import Fixtures from './pages/Fixtures'
+import News from './pages/News'
 import PredictedPoints from './pages/PredictedPoints'
 import LeagueTable from './pages/LeagueTable'
 import PlayerModal from './components/PlayerModal'
@@ -157,6 +158,10 @@ function App() {
                 onTeamClick={handleTeamClick}
               />
             }
+          />
+          <Route 
+            path="/news/:news_id" 
+            element={<News />}
           />
           <Route 
             path="/predicted-points" 

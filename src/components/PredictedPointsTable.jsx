@@ -31,6 +31,11 @@ class FPLPredictor {
                 this.teamNames[team.id] = team.name;
             });
 
+            // Find upcoming gameweek (first with finished = false)
+            const upcomingGW = this.bootstrap.events.find(event => event.finished === false);
+            this.nextGwId = upcomingGW ? upcomingGW.id : null;
+            console.log(`Upcoming Gameweek: ${this.nextGwId}`);
+
             // Filter for Active Players (not unavailable)
             this.activePlayers = this.bootstrap.elements.filter(p => p.status !== 'u');
             console.log(`Active Players identified: ${this.activePlayers.length}`);
