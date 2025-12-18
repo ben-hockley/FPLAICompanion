@@ -18,7 +18,6 @@
 [![Issues][issues-shield]][issues-url]
 [![project_license][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
-![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ben-hockley/e7c402fcd78dc96403e760bebd2a541e/raw/fplaicompanion-coverage.json)
 
 
 
