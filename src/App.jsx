@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
+import MyTeam from './pages/MyTeam'
+import PlayerStats from './pages/PlayerStats'
+import Fixtures from './pages/Fixtures'
 import PredictedPoints from './pages/PredictedPoints'
 import LeagueTable from './pages/LeagueTable'
 import PlayerModal from './components/PlayerModal'
@@ -91,9 +95,12 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Sidebar />
         <Navbar />
         
-        <Routes>
+        {/* Main content area with left margin for sidebar and top padding for navbar */}
+        <div className="ml-24 pt-16">
+          <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route 
             path="/home" 
@@ -101,12 +108,55 @@ function App() {
               <Home
                 players={players}
                 teams={teams}
-                myTeamPlayerIds={myTeamPlayerIds}
-                onTeamLoaded={handleTeamLoaded}
                 onPlayerClick={handlePlayerClick}
                 onTeamClick={handleTeamClick}
               />
             } 
+          />
+          <Route 
+            path="/my-team" 
+            element={
+              <MyTeam
+                players={players}
+                teams={teams}
+                myTeamPlayerIds={myTeamPlayerIds}
+                onTeamLoaded={handleTeamLoaded}
+                onTeamClick={handleTeamClick}
+              />
+            } 
+          />
+          <Route 
+            path="/player-stats" 
+            element={
+              <PlayerStats
+                players={players}
+                teams={teams}
+                myTeamPlayerIds={myTeamPlayerIds}
+                onTeamClick={handleTeamClick}
+              />
+            } 
+          />
+          <Route 
+            path="/fixtures/:gameweek" 
+            element={
+              <Fixtures
+                teams={teams}
+                allPlayers={players}
+                onPlayerClick={handlePlayerClick}
+                onTeamClick={handleTeamClick}
+              />
+            } 
+          />
+          <Route 
+            path="/fixtures" 
+            element={
+              <Fixtures
+                teams={teams}
+                allPlayers={players}
+                onPlayerClick={handlePlayerClick}
+                onTeamClick={handleTeamClick}
+              />
+            }
           />
           <Route 
             path="/predicted-points" 
@@ -127,6 +177,7 @@ function App() {
             } 
           />
         </Routes>
+        </div>
         
         {/* Player Modal */}
         {selectedPlayer && (
