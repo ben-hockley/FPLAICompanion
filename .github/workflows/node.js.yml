@@ -28,4 +28,29 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build --if-present
-    - run: npm test
+    - run: npm test -- --coverage --coverageReporters=text --coverageReporters=lcov
+    
+    - name: Upload coverage reports
+      if: matrix.node-version == '22.x'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage/
+    
+    - name: Generate coverage badge
+      if: matrix.node-version == '22.x' && github.ref == 'refs/heads/main'
+      uses: cicirello/jacoco-badge-generator@v2
+      with:
+        badges-directory: .github/badges
+        generate-coverage-badge: true
+        coverage-badge-filename: coverage.svg
+        jacoco-csv-file: coverage/lcov.info
+    
+    - name: Commit coverage badge
+      if: matrix.node-version == '22.x' && github.ref == 'refs/heads/main'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add .github/badges/coverage.svg || true
+        git diff --staged --quiet || git commit -m "Update coverage badge [skip ci]"
+        git push || true

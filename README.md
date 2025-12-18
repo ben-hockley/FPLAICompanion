@@ -18,6 +18,7 @@
 [![Issues][issues-shield]][issues-url]
 [![project_license][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
+![Coverage](https://raw.githubusercontent.com/ben-hockley/FPLAICompanion/main/.github/badges/coverage.svg)
 
 
 
