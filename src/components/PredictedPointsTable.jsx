@@ -283,7 +283,7 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick
     const sortedPlayers = getSortedPlayers();
 
     return (
-        <div className="flex flex-col h-[600px]">
+        <div className="flex flex-col">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-800">
                     Predicted Points for GW {gameweek}
@@ -303,8 +303,8 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick
                 )}
             </div>
 
-            <div className="flex-1 flex flex-col overflow-hidden">
-                <div className="flex-1 overflow-y-auto">
+            <div>
+                <div>
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-blue-600 text-white sticky top-0">
                             <tr>

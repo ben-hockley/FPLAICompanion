@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { TEAM_BADGES } from '../utils/teamBadges';
 
 const Navbar = ({ players = [], teams = {}, onPlayerClick, onTeamClick }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -113,9 +114,14 @@ const Navbar = ({ players = [], teams = {}, onPlayerClick, onTeamClick }) => {
                             onClick={() => handleTeamSelect(team.id)}
                             className="w-full px-4 py-3 hover:bg-blue-50 text-left transition-colors border-b border-gray-100 flex items-center gap-3"
                           >
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              <span className="text-blue-600 font-bold text-sm">T</span>
-                            </div>
+                            <img
+                              src={TEAM_BADGES[team.id]}
+                              alt={team.name}
+                              className="w-10 h-10 object-contain"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
                             <span className="text-gray-900 font-medium">{team.name}</span>
                           </button>
                         ))}
@@ -139,7 +145,7 @@ const Navbar = ({ players = [], teams = {}, onPlayerClick, onTeamClick }) => {
                               alt={player.web_name}
                               className="w-10 h-14 object-cover rounded"
                               onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/40x56/E5E7EB/6B7280?text=Player';
+                                e.target.src = 'https://resources.premierleague.com/premierleague25/photos/players/110x140/placeholder.png';
                               }}
                             />
                             <div className="flex-1">
