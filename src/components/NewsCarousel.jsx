@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../supabaseClient';
 
 // Placeholder news data
 const PLACEHOLDER_NEWS = [
@@ -37,22 +38,58 @@ const PLACEHOLDER_NEWS = [
 
 const NewsCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [news, setNews] = useState(PLACEHOLDER_NEWS);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('News')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching news:', error);
+          return;
+        }
+        
+        console.log('News data from Supabase:', data);
+        
+        if (data && data.length > 0) {
+          // Map Supabase data format to component format
+          const mappedNews = data.map(item => ({
+            id: item.id,
+            title: item.Title,
+            date: item.created_at,
+            image: item.PictureUrl,
+            content: item.Content,
+            pictureCredit: item.PictureCredit
+          }));
+          setNews(mappedNews);
+        }
+      } catch (err) {
+        console.error('Exception fetching news:', err);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % PLACEHOLDER_NEWS.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % news.length);
     }, 6000); // Auto-scroll every 6 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [news.length]);
 
   const goToPrevious = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + PLACEHOLDER_NEWS.length) % PLACEHOLDER_NEWS.length);
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + news.length) % news.length);
   };
 
   const goToNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % PLACEHOLDER_NEWS.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % news.length);
   };
 
   const formatDate = (dateString) => {
@@ -60,7 +97,7 @@ const NewsCarousel = () => {
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
-  const currentNews = PLACEHOLDER_NEWS[currentIndex];
+  const currentNews = news[currentIndex];
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -77,6 +114,24 @@ const NewsCarousel = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
+
+        {/* Ensure carousel is taller and images always fit inside */}
+        <style>{`
+          .group { height: 28rem !important; } /* taller than h-96 */
+          .group img { object-fit: contain !important; max-height: 100%; width: 100%; object-position: top; }
+        `}</style>
+        {/* Blurred background using the same image to fill the carousel when the main image doesn't */}
+        <div
+            className="absolute inset-0"
+            style={{
+                backgroundImage: `url(${currentNews.image})`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                backgroundSize: 'cover',
+                filter: 'blur(24px)',
+                transform: 'scale(1.08)',
+            }}
+        />
 
         <button
           onClick={(e) => {
@@ -112,7 +167,7 @@ const NewsCarousel = () => {
 
         {/* Indicators */}
         <div className="absolute bottom-6 right-6 flex gap-2">
-          {PLACEHOLDER_NEWS.map((_, index) => (
+          {news.map((_, index) => (
             <button
               key={index}
               onClick={(e) => {

@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { supabase } from '../../supabaseClient';
 
-// Placeholder news data (same as carousel)
+// Placeholder news data (same as carousel) - fallback only
 const PLACEHOLDER_NEWS = [
   {
     id: 1,
@@ -101,17 +102,67 @@ const News = () => {
   const { news_id } = useParams();
   const navigate = useNavigate();
   const [news, setNews] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Find news by ID from placeholder data
-    const foundNews = PLACEHOLDER_NEWS.find(n => n.id === parseInt(news_id));
-    setNews(foundNews);
+    const fetchNewsArticle = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('News')
+          .select('*')
+          .eq('id', parseInt(news_id))
+          .single();
+        
+        if (error) {
+          console.error('Error fetching news article:', error);
+          // Fallback to placeholder data
+          const foundNews = PLACEHOLDER_NEWS.find(n => n.id === parseInt(news_id));
+          setNews(foundNews);
+          setLoading(false);
+          return;
+        }
+        
+        if (data) {
+          // Map Supabase data format to component format
+          const mappedArticle = {
+            id: data.id,
+            title: data.Title,
+            date: data.created_at,
+            image: data.PictureUrl,
+            content: data.Content,
+            pictureCredit: data.PictureCredit
+          };
+          setNews(mappedArticle);
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error('Exception fetching news article:', err);
+        // Fallback to placeholder data
+        const foundNews = PLACEHOLDER_NEWS.find(n => n.id === parseInt(news_id));
+        setNews(foundNews);
+        setLoading(false);
+      }
+    };
+
+    fetchNewsArticle();
   }, [news_id]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   };
+
+  if (loading) {
+    return (
+      <div className="p-4 md:px-8 pb-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <p className="text-gray-600">Loading news article...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!news) {
     return (
@@ -168,16 +219,18 @@ const News = () => {
 
             {/* Content */}
             <div 
-              className="prose prose-lg max-w-none text-gray-700"
+              className="max-w-none text-gray-700 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:mt-6 [&_h2]:mb-4 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:mt-4 [&_h3]:mb-3 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:mb-4 [&_li]:mb-2"
               dangerouslySetInnerHTML={{ __html: news.content }}
             />
 
             {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <p className="text-gray-500 text-sm">
-                This is placeholder content. Connect to your database to display actual news articles.
-              </p>
-            </div>
+            {news.pictureCredit && (
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <p className="text-gray-500 text-sm">
+                  Photo credit: {news.pictureCredit}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

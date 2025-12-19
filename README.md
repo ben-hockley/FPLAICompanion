@@ -81,9 +81,12 @@
 This is an AI Powered Fantasy Premier League companion, that helps users make better decisions in fantasy premier league.
 
 Features Include:
+
+- Fantasy Football News
 - Predicted Points Table
-- Player Stats
-- Fixtures/ Results information
+- Player Season Stats
+- Team Fixtures and Squads
+- Fixtures/ Results and Match Information
 - Team-specific Transfer Advice
 
 <img width="1893" height="953" alt="image" src="https://github.com/user-attachments/assets/1c3d9b9f-891f-4de5-a649-605fbd30da26" />
