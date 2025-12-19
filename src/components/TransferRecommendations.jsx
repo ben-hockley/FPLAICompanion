@@ -162,7 +162,11 @@ const TransferRecommendations = ({ isOpen, onClose, teamData, allPlayers, teams 
           let justification = '';
           
           if (outCandidate.hasInjury) {
-            justification = `${outCandidate.player.web_name} is ${outCandidate.player.status === 'i' ? 'injured' : outCandidate.player.status === 'd' ? 'doubtful' : 'unavailable'}. `;
+            const statusText = outCandidate.player.status === 'i' ? 'injured' : 
+                              outCandidate.player.status === 'd' ? 'doubtful' : 
+                              outCandidate.player.status === 'n' ? 'away' : 
+                              outCandidate.player.status === 's' ? 'suspended' : 'unavailable';
+            justification = `${outCandidate.player.web_name} is ${statusText}. `;
           }
           
           if (outCandidate.form < 2 && replacement.form > 3) {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import FixtureModal from './FixtureModal';
 import { TEAM_BADGES } from '../utils/teamBadges';
 
-const FixturesCarousel = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
+const FixturesCarousel = ({ teams, allPlayers, onPlayerClick, onTeamClick, gameweek }) => {
   const [fixtures, setFixtures] = useState([]);
   const [currentGameweek, setCurrentGameweek] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -12,8 +12,10 @@ const FixturesCarousel = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => 
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchFixtures();
-  }, []);
+    if (gameweek) {
+      fetchFixtures(gameweek);
+    }
+  }, [gameweek]);
 
   useEffect(() => {
     if (fixtures.length === 0) return;
@@ -25,20 +27,16 @@ const FixturesCarousel = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => 
     return () => clearInterval(interval);
   }, [fixtures.length]);
 
-  const fetchFixtures = async () => {
+  const fetchFixtures = async (gw) => {
     try {
       setLoading(true);
-      
-      const bootstrapResponse = await fetch('/api/bootstrap-static/');
-      const bootstrapData = await bootstrapResponse.json();
-      const currentGW = bootstrapData.events.find(event => event.is_current)?.id || 15;
-      setCurrentGameweek(currentGW);
+      setCurrentGameweek(gw);
       
       const fixturesResponse = await fetch('/api/fixtures/');
       const fixturesData = await fixturesResponse.json();
       
       const gwFixtures = fixturesData
-        .filter(fixture => fixture.event === currentGW)
+        .filter(fixture => fixture.event === gw)
         .sort((a, b) => new Date(a.kickoff_time) - new Date(b.kickoff_time));
       
       setFixtures(gwFixtures);

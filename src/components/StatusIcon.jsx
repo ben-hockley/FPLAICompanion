@@ -6,7 +6,8 @@ const StatusIcon = ({ status, news = "", className = "" }) => {
     i: { color: 'bg-red-500', text: 'Injured', icon: 'I' },
     d: { color: 'bg-yellow-500', text: 'Doubtful', icon: 'D' },
     u: { color: 'bg-gray-500', text: 'Unavailable', icon: 'U' },
-    s: { color: 'bg-orange-500', text: 'Suspended', icon: 'S' }
+    s: { color: 'bg-orange-500', text: 'Suspended', icon: 'S' },
+    n: { color: 'bg-blue-500', text: 'Away', icon: 'A' }
   };
 
   const config = statusConfig[status.toLowerCase()];

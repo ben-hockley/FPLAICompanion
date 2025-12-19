@@ -28,8 +28,8 @@ class FPLPredictor {
             const upcomingGW = this.bootstrap.events.find(event => event.finished === false);
             this.nextGwId = upcomingGW ? upcomingGW.id : null;
 
-            // Filter for Active Players (not unavailable)
-            this.activePlayers = this.bootstrap.elements.filter(p => p.status !== 'u');
+            // Filter for Active Players (not unavailable, not away)
+            this.activePlayers = this.bootstrap.elements.filter(p => p.status !== 'u' && p.status !== 'n');
 
         } catch (error) {
             console.error("Initialization Error:", error);
@@ -98,7 +98,7 @@ class FPLPredictor {
             team: this.teamNames[player.team],
             position: positionId === 1 ? 'GK' : positionId === 2 ? 'DEF' : positionId === 3 ? 'MID' : 'FWD',
             cost: cost,
-            predicted_points: (player.status === "i" || player.status === "s") ? 0.0 : pPoints,
+            predicted_points: (player.status === "i" || player.status === "s" || player.status === "n") ? 0.0 : pPoints,
         };
     }
 }

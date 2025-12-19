@@ -13,7 +13,16 @@ const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
         const res = await fetch('/api/bootstrap-static/');
         if (!res.ok) return;
         const data = await res.json();
-        const gw = data.events.find(e => e.is_current)?.id || null;
+        
+        // Find earliest incomplete gameweek
+        // A gameweek is incomplete if it hasn't finished OR if it's current and has started
+        const incompleteGW = data.events.find(e => {
+          // If the gameweek hasn't finished, it's incomplete
+          if (!e.finished) return true;
+          return false;
+        });
+        
+        const gw = incompleteGW?.id || data.events.find(e => e.is_current)?.id || null;
         if (mounted) setCurrentGameweek(gw);
       } catch (err) {
         // ignore
@@ -47,6 +56,7 @@ const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
                 allPlayers={players}
                 onPlayerClick={onPlayerClick}
                 onTeamClick={onTeamClick}
+                gameweek={currentGameweek}
               />
             </div>
             

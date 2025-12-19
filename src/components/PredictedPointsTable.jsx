@@ -36,8 +36,8 @@ class FPLPredictor {
             this.nextGwId = upcomingGW ? upcomingGW.id : null;
             console.log(`Upcoming Gameweek: ${this.nextGwId}`);
 
-            // Filter for Active Players (not unavailable)
-            this.activePlayers = this.bootstrap.elements.filter(p => p.status !== 'u');
+            // Filter for Active Players (not unavailable, not away)
+            this.activePlayers = this.bootstrap.elements.filter(p => p.status !== 'u' && p.status !== 'n');
             console.log(`Active Players identified: ${this.activePlayers.length}`);
 
         } catch (error) {
@@ -123,12 +123,12 @@ class FPLPredictor {
             // Injured (I) or Suspended (S) => nailedness 0
 
             // Replace with more accurate assessment if player is likely to start
-            nailedness: (player.status == "i" || player.status == "s") ? 0.0 : 1.0, // Set nailedness to 0 if injured/suspended
+            nailedness: (player.status == "i" || player.status == "s" || player.status == "n") ? 0.0 : 1.0, // Set nailedness to 0 if injured/suspended/away
             
             goal_prob: parseFloat((goalProb || 0).toFixed(2)), // Simplify probabilities to 2 d.p
             assist_prob: parseFloat((assistProb || 0).toFixed(2)),
             clean_sheet_prob: positionId === 4 ? null : parseFloat((cleanSheetProb || 0).toFixed(2)),
-            predicted_points: (player.status == "i" || player.status == "s") ? 0.0 : pPoints, // Set predicted points to 0 if injured/suspended
+            predicted_points: (player.status == "i" || player.status == "s" || player.status == "n") ? 0.0 : pPoints, // Set predicted points to 0 if injured/suspended/away
             roi: parseFloat((pPoints / cost).toFixed(2))
         };
     }
