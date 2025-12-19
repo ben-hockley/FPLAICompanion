@@ -3,6 +3,7 @@ import { TEAM_BADGES } from '../utils/teamBadges';
 
 const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTeamClick }) => {
   const [fixtureDetails, setFixtureDetails] = useState(null);
+  const [liveData, setLiveData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -26,6 +27,7 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
       setLoading(true);
       setError(null);
       
+      // Fetch fixture details
       const response = await fetch(`/api/fixtures/?event=${fixture.event}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch fixture details (${response.status})`);
@@ -35,6 +37,20 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
       const fixtureData = fixturesData.find(f => f.id === fixture.id);
       
       setFixtureDetails(fixtureData);
+      
+      // Fetch live gameweek data if match has started
+      if (fixture.started || fixture.finished) {
+        try {
+          const liveResponse = await fetch(`/api/event/${fixture.event}/live/`);
+          if (liveResponse.ok) {
+            const liveGameweekData = await liveResponse.json();
+            setLiveData(liveGameweekData);
+          }
+        } catch (liveErr) {
+          console.error('Failed to fetch live data:', liveErr);
+        }
+      }
+      
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -60,14 +76,14 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
   };
 
   const getLineup = (teamId) => {
-    if (!fixtureDetails || !fixtureDetails.stats) return [];
+    if (!fixtureDetails || !fixtureDetails.stats) return { starters: [], subs: [] };
     
     // Get BPS list which includes all players who played
     const bpsList = fixtureDetails.stats.find(stat => stat.identifier === 'bps');
-    if (!bpsList) return [];
+    if (!bpsList) return { starters: [], subs: [] };
     
     const teamBps = teamId === fixture.team_h ? bpsList.h : bpsList.a;
-    if (!teamBps) return [];
+    if (!teamBps) return { starters: [], subs: [] };
     
     // Create player stats map
     const playerStatsMap = new Map();
@@ -76,6 +92,11 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
     teamBps.forEach(bpsEntry => {
       const player = allPlayers.find(p => p.id === bpsEntry.element);
       if (player) {
+        // Get live data for this player
+        const livePlayerData = liveData?.elements?.find(e => e.id === bpsEntry.element);
+        const started = livePlayerData?.stats?.starts || false;
+        const minutes = livePlayerData?.stats?.minutes || 0;
+        
         playerStatsMap.set(bpsEntry.element, {
           player,
           goals: 0,
@@ -85,7 +106,9 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
           redCards: 0,
           saves: 0,
           bps: bpsEntry.value || 0,
-          defensiveContribution: 0
+          defensiveContribution: 0,
+          started: started,
+          minutes: minutes
         });
       }
     });
@@ -174,8 +197,11 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
       });
     }
     
-    // Convert map to array and sort by position then by BPS
-    const lineup = Array.from(playerStatsMap.values())
+    // Convert map to array and separate starters from subs
+    const playersList = Array.from(playerStatsMap.values());
+    
+    const starters = playersList
+      .filter(p => p.started)
       .sort((a, b) => {
         // Sort by position first (GK, DEF, MID, FWD)
         if (a.player.element_type !== b.player.element_type) {
@@ -185,7 +211,18 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
         return b.bps - a.bps;
       });
     
-    return lineup;
+    const subs = playersList
+      .filter(p => !p.started && p.minutes > 0)
+      .sort((a, b) => {
+        // Sort by position first
+        if (a.player.element_type !== b.player.element_type) {
+          return a.player.element_type - b.player.element_type;
+        }
+        // Then by minutes played
+        return b.minutes - a.minutes;
+      });
+    
+    return { starters, subs };
   };
 
   const getPositionLabel = (elementType) => {
@@ -371,42 +408,96 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
                       />
                       {teams[fixture.team_h]}
                     </h4>
-                    <div className="space-y-1">
-                      {getLineup(fixture.team_h).map((playerStat) => {
-                        const icons = getPlayerIcons(playerStat);
-                        return (
-                          <button
-                            key={playerStat.player.id}
-                            onClick={() => handlePlayerClick(playerStat.player)}
-                            className="w-full flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100 transition cursor-pointer text-left"
-                          >
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <span className="text-xs font-semibold text-gray-500 flex-shrink-0 w-8">
-                                {getPositionLabel(playerStat.player.element_type)}
-                              </span>
-                              <span className="font-medium text-gray-800 text-sm truncate">
-                                {playerStat.player.web_name}
-                              </span>
-                              <div className="flex gap-1 flex-wrap">
-                                {icons.map((icon, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="text-sm"
-                                    title={icon.title}
-                                  >
-                                    {icon.emoji}{icon.count !== null && icon.count > 1 ? icon.count : ''}
-                                  </span>
-                                ))}
+                    
+                    {/* Starting XI */}
+                    <div className="mb-4">
+                      <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Starting XI</h5>
+                      <div className="space-y-1">
+                        {getLineup(fixture.team_h).starters.map((playerStat) => {
+                          const icons = getPlayerIcons(playerStat);
+                          const subbedOff = playerStat.minutes < 90;
+                          return (
+                            <button
+                              key={playerStat.player.id}
+                              onClick={() => handlePlayerClick(playerStat.player)}
+                              className="w-full flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100 transition cursor-pointer text-left"
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <span className="text-xs font-semibold text-gray-500 flex-shrink-0 w-8">
+                                  {getPositionLabel(playerStat.player.element_type)}
+                                </span>
+                                <span className="font-medium text-gray-800 text-sm truncate">
+                                  {playerStat.player.web_name}
+                                </span>
+                                <div className="flex gap-1 flex-wrap items-center">
+                                  {icons.map((icon, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="text-sm"
+                                      title={icon.title}
+                                    >
+                                      {icon.emoji}{icon.count !== null && icon.count > 1 ? icon.count : ''}
+                                    </span>
+                                  ))}
+                                  {subbedOff && (
+                                    <span className="text-red-500 text-xs font-bold" title={`Substituted off at ${playerStat.minutes}'`}>
+                                      ↓ {playerStat.minutes == 45 ? 45 : playerStat.minutes + 1}' {/* +1 to indicate the minute they were subbed off, apart from halftime subs */}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="text-xs text-gray-400 flex-shrink-0">→</div>
-                          </button>
-                        );
-                      })}
-                      {getLineup(fixture.team_h).length === 0 && (
-                        <p className="text-sm text-gray-500 italic">Lineup not available</p>
-                      )}
+                              <div className="text-xs text-gray-400 flex-shrink-0">→</div>
+                            </button>
+                          );
+                        })}
+                        {getLineup(fixture.team_h).starters.length === 0 && (
+                          <p className="text-sm text-gray-500 italic">No starting lineup available</p>
+                        )}
+                      </div>
                     </div>
+                    
+                    {/* Substitutes */}
+                    {getLineup(fixture.team_h).subs.length > 0 && (
+                      <div>
+                        <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Substitutes</h5>
+                        <div className="space-y-1">
+                          {getLineup(fixture.team_h).subs.map((playerStat) => {
+                            const icons = getPlayerIcons(playerStat);
+                            return (
+                              <button
+                                key={playerStat.player.id}
+                                onClick={() => handlePlayerClick(playerStat.player)}
+                                className="w-full flex items-center justify-between p-2 bg-green-50 rounded hover:bg-green-100 transition cursor-pointer text-left"
+                              >
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <span className="text-xs font-semibold text-gray-500 flex-shrink-0 w-8">
+                                    {getPositionLabel(playerStat.player.element_type)}
+                                  </span>
+                                  <span className="font-medium text-gray-800 text-sm truncate">
+                                    {playerStat.player.web_name}
+                                  </span>
+                                  <div className="flex gap-1 flex-wrap items-center">
+                                    <span className="text-green-600 text-xs font-bold" title={`Substituted on, played ${playerStat.minutes} minutes`}>
+                                      ↑ {90 - playerStat.minutes}'
+                                    </span>
+                                    {icons.map((icon, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="text-sm"
+                                        title={icon.title}
+                                      >
+                                        {icon.emoji}{icon.count !== null && icon.count > 1 ? icon.count : ''}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="text-xs text-gray-400 flex-shrink-0">→</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Away Team Lineup */}
@@ -420,42 +511,96 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
                       />
                       {teams[fixture.team_a]}
                     </h4>
-                    <div className="space-y-1">
-                      {getLineup(fixture.team_a).map((playerStat) => {
-                        const icons = getPlayerIcons(playerStat);
-                        return (
-                          <button
-                            key={playerStat.player.id}
-                            onClick={() => handlePlayerClick(playerStat.player)}
-                            className="w-full flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100 transition cursor-pointer text-left"
-                          >
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <span className="text-xs font-semibold text-gray-500 flex-shrink-0 w-8">
-                                {getPositionLabel(playerStat.player.element_type)}
-                              </span>
-                              <span className="font-medium text-gray-800 text-sm truncate">
-                                {playerStat.player.web_name}
-                              </span>
-                              <div className="flex gap-1 flex-wrap">
-                                {icons.map((icon, idx) => (
-                                  <span
-                                    key={idx}
-                                    className="text-sm"
-                                    title={icon.title}
-                                  >
-                                    {icon.emoji}{icon.count !== null && icon.count > 1 ? icon.count : ''}
-                                  </span>
-                                ))}
+                    
+                    {/* Starting XI */}
+                    <div className="mb-4">
+                      <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Starting XI</h5>
+                      <div className="space-y-1">
+                        {getLineup(fixture.team_a).starters.map((playerStat) => {
+                          const icons = getPlayerIcons(playerStat);
+                          const subbedOff = playerStat.minutes < 90;
+                          return (
+                            <button
+                              key={playerStat.player.id}
+                              onClick={() => handlePlayerClick(playerStat.player)}
+                              className="w-full flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100 transition cursor-pointer text-left"
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <span className="text-xs font-semibold text-gray-500 flex-shrink-0 w-8">
+                                  {getPositionLabel(playerStat.player.element_type)}
+                                </span>
+                                <span className="font-medium text-gray-800 text-sm truncate">
+                                  {playerStat.player.web_name}
+                                </span>
+                                <div className="flex gap-1 flex-wrap items-center">
+                                  {icons.map((icon, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="text-sm"
+                                      title={icon.title}
+                                    >
+                                      {icon.emoji}{icon.count !== null && icon.count > 1 ? icon.count : ''}
+                                    </span>
+                                  ))}
+                                  {subbedOff && (
+                                    <span className="text-red-500 text-xs font-bold" title={`Substituted off at ${playerStat.minutes}'`}>
+                                      ↓ {playerStat.minutes == 45 ? 45 : playerStat.minutes + 1}' {/* +1 to indicate the minute they were subbed off, apart from halftime subs */}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="text-xs text-gray-400 flex-shrink-0">→</div>
-                          </button>
-                        );
-                      })}
-                      {getLineup(fixture.team_a).length === 0 && (
-                        <p className="text-sm text-gray-500 italic">Lineup not available</p>
-                      )}
+                              <div className="text-xs text-gray-400 flex-shrink-0">→</div>
+                            </button>
+                          );
+                        })}
+                        {getLineup(fixture.team_a).starters.length === 0 && (
+                          <p className="text-sm text-gray-500 italic">No starting lineup available</p>
+                        )}
+                      </div>
                     </div>
+                    
+                    {/* Substitutes */}
+                    {getLineup(fixture.team_a).subs.length > 0 && (
+                      <div>
+                        <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Substitutes</h5>
+                        <div className="space-y-1">
+                          {getLineup(fixture.team_a).subs.map((playerStat) => {
+                            const icons = getPlayerIcons(playerStat);
+                            return (
+                              <button
+                                key={playerStat.player.id}
+                                onClick={() => handlePlayerClick(playerStat.player)}
+                                className="w-full flex items-center justify-between p-2 bg-green-50 rounded hover:bg-green-100 transition cursor-pointer text-left"
+                              >
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <span className="text-xs font-semibold text-gray-500 flex-shrink-0 w-8">
+                                    {getPositionLabel(playerStat.player.element_type)}
+                                  </span>
+                                  <span className="font-medium text-gray-800 text-sm truncate">
+                                    {playerStat.player.web_name}
+                                  </span>
+                                  <div className="flex gap-1 flex-wrap items-center">
+                                    <span className="text-green-600 text-xs font-bold" title={`Substituted on, played ${playerStat.minutes} minutes`}>
+                                      ↑ {90 - playerStat.minutes}'
+                                    </span>
+                                    {icons.map((icon, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="text-sm"
+                                        title={icon.title}
+                                      >
+                                        {icon.emoji}{icon.count !== null && icon.count > 1 ? icon.count : ''}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="text-xs text-gray-400 flex-shrink-0">→</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
