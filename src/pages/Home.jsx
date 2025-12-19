@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import FixturesCarousel from '../components/FixturesCarousel';
 import TopPicks from '../components/TopPicks';
 import NewsCarousel from '../components/NewsCarousel';
+import FPLLeaders from '../components/FPLLeaders';
 
 const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
   const [currentGameweek, setCurrentGameweek] = useState(null);
@@ -70,9 +71,16 @@ const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
             </div>
           </div>
 
-          {/* Right Column: News Carousel - 2/3 width */}
-          <div style={{ width: 'calc((100vw - 6rem) * 2 / 3)' }} className="min-w-[500px]">
+          {/* Right Column: News Carousel and FPL Leaders - 2/3 width */}
+          <div style={{ width: 'calc((100vw - 6rem) * 2 / 3)' }} className="min-w-[500px] flex flex-col gap-6">
             <NewsCarousel />
+            
+            {/* FPL Leaders Section */}
+            <FPLLeaders 
+              allPlayers={players}
+              teams={teams}
+              onPlayerClick={onPlayerClick}
+            />
           </div>
         </div>
       </div>
