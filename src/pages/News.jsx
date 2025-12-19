@@ -130,7 +130,8 @@ const News = () => {
             date: data.created_at,
             image: data.PictureUrl,
             content: data.Content,
-            pictureCredit: data.PictureCredit
+            pictureCredit: data.PictureCredit,
+            author: data.Author
           };
           setNews(mappedArticle);
         }
@@ -217,6 +218,11 @@ const News = () => {
             {/* Title */}
             <h1 className="text-4xl font-bold text-gray-900 mb-6">{news.title}</h1>
 
+            {/* Author */}
+            {news.author && (
+              <p className="text-gray-600 text-sm mb-6">By <span className="font-semibold">{news.author}</span></p>
+            )}
+
             {/* Content */}
             <div 
               className="max-w-none text-gray-700 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:mt-6 [&_h2]:mb-4 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:mt-4 [&_h3]:mb-3 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:mb-4 [&_li]:mb-2"
@@ -231,6 +237,19 @@ const News = () => {
                 </p>
               </div>
             )}
+
+            {/* All News Link */}
+            <div className="mt-6 text-center">
+              <button
+                onClick={() => navigate('/articles')}
+                className="text-purple-600 hover:text-purple-700 font-semibold text-lg inline-flex items-center gap-2"
+              >
+                All news
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>

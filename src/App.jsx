@@ -7,6 +7,7 @@ import MyTeam from './pages/MyTeam'
 import PlayerStats from './pages/PlayerStats'
 import Fixtures from './pages/Fixtures'
 import News from './pages/News'
+import Articles from './pages/Articles'
 import PredictedPoints from './pages/PredictedPoints'
 import LeagueTable from './pages/LeagueTable'
 import PlayerModal from './components/PlayerModal'
@@ -162,6 +163,10 @@ function App() {
           <Route 
             path="/news/:news_id" 
             element={<News />}
+          />
+          <Route 
+            path="/articles" 
+            element={<Articles />}
           />
           <Route 
             path="/predicted-points" 

@@ -47,7 +47,8 @@ const NewsCarousel = () => {
         const { data, error } = await supabase
           .from('News')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(5);
         
         if (error) {
           console.error('Error fetching news:', error);
@@ -64,7 +65,8 @@ const NewsCarousel = () => {
             date: item.created_at,
             image: item.PictureUrl,
             content: item.Content,
-            pictureCredit: item.PictureCredit
+            pictureCredit: item.PictureCredit,
+            author: item.Author
           }));
           setNews(mappedNews);
         }
@@ -163,6 +165,9 @@ const NewsCarousel = () => {
           <h2 className="text-white text-2xl font-bold leading-tight">
             {currentNews.title}
           </h2>
+          {currentNews.author && (
+            <p className="text-blue-200 text-sm mt-2">By {currentNews.author}</p>
+          )}
         </div>
 
         {/* Indicators */}
