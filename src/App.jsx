@@ -98,7 +98,12 @@ function App() {
     <Router>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         <Sidebar />
-        <Navbar />
+        <Navbar 
+          players={players}
+          teams={teams}
+          onPlayerClick={handlePlayerClick}
+          onTeamClick={handleTeamClick}
+        />
         
         {/* Main content area with left margin for sidebar and top padding for navbar */}
         <div className="ml-24 pt-16">
