@@ -73,6 +73,10 @@ export default {
       });
       
       // Add cache control for static data
+      // Note: Different endpoints may benefit from different cache durations:
+      // - bootstrap-static: 300-600s (updates infrequently)
+      // - fixtures: 60-300s (updates moderately)
+      // - event/X/live: 10-30s (updates frequently during matches)
       modifiedResponse.headers.set('Cache-Control', 'public, max-age=300');
       
       return modifiedResponse;

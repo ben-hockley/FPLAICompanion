@@ -13,8 +13,13 @@ const getApiBaseUrl = () => {
   // In production (GitHub Pages), use Cloudflare Workers URL if provided
   const cloudflareWorkerUrl = import.meta.env.VITE_CLOUDFLARE_WORKER_URL;
   
-  if (import.meta.env.PROD && cloudflareWorkerUrl) {
-    return cloudflareWorkerUrl;
+  if (import.meta.env.PROD) {
+    if (cloudflareWorkerUrl) {
+      return cloudflareWorkerUrl;
+    } else {
+      // Warn in production if Cloudflare Worker URL is not set
+      console.warn('VITE_CLOUDFLARE_WORKER_URL is not set. API calls may fail on GitHub Pages. See CLOUDFLARE_SETUP.md for setup instructions.');
+    }
   }
   
   // In development, use the Vite proxy
