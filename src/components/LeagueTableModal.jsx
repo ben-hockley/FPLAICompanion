@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TEAM_BADGES } from '../utils/teamBadges';
+import { fetchFPLApi } from '../utils/api';
 
 const LeagueTableModal = ({ teams, onClose, onTeamClick }) => {
   const [tableData, setTableData] = useState([]);
@@ -27,7 +28,7 @@ const LeagueTableModal = ({ teams, onClose, onTeamClick }) => {
       setError(null);
 
       // Fetch all fixtures
-      const response = await fetch('/api/fixtures/');
+      const response = await fetchFPLApi('fixtures/');
       if (!response.ok) {
         throw new Error(`Failed to fetch fixtures (${response.status})`);
       }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import FixtureModal from '../components/FixtureModal';
 import { TEAM_BADGES } from '../utils/teamBadges';
+import { fetchFPLApi } from '../utils/api';
 
 const Fixtures = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
   const { gameweek } = useParams();
@@ -20,7 +21,7 @@ const Fixtures = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
     try {
       setLoading(true);
       
-      const bootstrapResponse = await fetch('/api/bootstrap-static/');
+      const bootstrapResponse = await fetchFPLApi('bootstrap-static/');
       const bootstrapData = await bootstrapResponse.json();
       const currentGW = bootstrapData.events.find(event => event.is_current)?.id || 15;
       setCurrentGameweek(currentGW);
@@ -28,7 +29,7 @@ const Fixtures = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
       const targetGW = gw || currentGW;
       setDisplayedGameweek(targetGW);
       
-      const fixturesResponse = await fetch('/api/fixtures/');
+      const fixturesResponse = await fetchFPLApi('fixtures/');
       const fixturesData = await fixturesResponse.json();
       
       const gwFixtures = fixturesData

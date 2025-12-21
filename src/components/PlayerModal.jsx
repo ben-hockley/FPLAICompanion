@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import StatusIcon from './StatusIcon';
 import { getCountryCode } from '../utils/regionFlags';
 import * as flags from 'country-flag-icons/react/3x2';
+import { fetchFPLApi } from '../utils/api';
 
 // Custom SVG UK Flags.
 import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
@@ -44,14 +45,14 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
       setError(null);
       
       // Fetch player details
-      const detailsResponse = await fetch(`/api/element-summary/${player.id}/`);
+      const detailsResponse = await fetchFPLApi(`element-summary/${player.id}/`);
       if (!detailsResponse.ok) {
         throw new Error(`Failed to fetch player details (${detailsResponse.status})`);
       }
       const detailsData = await detailsResponse.json();
       
       // Fetch all fixtures
-      const fixturesResponse = await fetch('/api/fixtures/');
+      const fixturesResponse = await fetchFPLApi('fixtures/');
       let fixturesData = [];
       if (fixturesResponse.ok) {
         fixturesData = await fixturesResponse.json();

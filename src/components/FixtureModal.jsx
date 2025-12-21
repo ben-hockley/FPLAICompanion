@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TEAM_BADGES } from '../utils/teamBadges';
+import { fetchFPLApi } from '../utils/api';
 
 const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTeamClick }) => {
   const [fixtureDetails, setFixtureDetails] = useState(null);
@@ -28,7 +29,7 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
       setError(null);
       
       // Fetch fixture details
-      const response = await fetch(`/api/fixtures/?event=${fixture.event}`);
+      const response = await fetchFPLApi(`fixtures/?event=${fixture.event}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch fixture details (${response.status})`);
       }
@@ -41,7 +42,7 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
       // Fetch live gameweek data if match has started
       if (fixture.started || fixture.finished) {
         try {
-          const liveResponse = await fetch(`/api/event/${fixture.event}/live/`);
+          const liveResponse = await fetchFPLApi(`event/${fixture.event}/live/`);
           if (liveResponse.ok) {
             const liveGameweekData = await liveResponse.json();
             setLiveData(liveGameweekData);

@@ -3,6 +3,7 @@ import FixturesCarousel from '../components/FixturesCarousel';
 import TopPicks from '../components/TopPicks';
 import NewsCarousel from '../components/NewsCarousel';
 import FPLLeaders from '../components/FPLLeaders';
+import { fetchFPLApi } from '../utils/api';
 
 const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
   const [currentGameweek, setCurrentGameweek] = useState(null);
@@ -11,7 +12,7 @@ const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
     let mounted = true;
     const fetchBootstrap = async () => {
       try {
-        const res = await fetch('/api/bootstrap-static/');
+        const res = await fetchFPLApi('bootstrap-static/');
         if (!res.ok) return;
         const data = await res.json();
         
