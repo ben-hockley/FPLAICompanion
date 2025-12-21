@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 // Requests starting with `/api` will be forwarded to the FPL host. 
 export default defineConfig({
   plugins: [react()],
+  base: '/FPLAICompanion/',
   server: {
     proxy: {
       '/api': {
