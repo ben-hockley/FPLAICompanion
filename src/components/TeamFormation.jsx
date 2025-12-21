@@ -6,6 +6,7 @@ import { getCountryCode } from '../utils/regionFlags';
 import * as flags from 'country-flag-icons/react/3x2';
 import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
 import { TEAM_BADGES } from '../utils/teamBadges';
+import { fetchFPLApi } from '../utils/api';
 
 const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
   const [managerId, setManagerId] = useState('');
@@ -28,7 +29,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
 
   const [CURRENT_GAMEWEEK, setCURRENT_GAMEWEEK] = useState(() => {
     // Kick off async fetch once during initial render to avoid adding useEffect import
-    fetch('/api/bootstrap-static/')
+    fetchFPLApi('bootstrap-static/')
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (!data) return;
@@ -91,7 +92,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
       // Fetch manager info if manager ID has changed
       if (loadedManagerId !== managerId) {
         try {
-          const managerResponse = await fetch(`/api/entry/${managerId}/`);
+          const managerResponse = await fetchFPLApi(`entry/${managerId}/`);
           if (managerResponse.ok) {
             const managerData = await managerResponse.json();
             setManagerInfo({
@@ -118,7 +119,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
         }
       }
       
-      const response = await fetch(`/api/entry/${managerId}/event/${gameweek}/picks/`);
+      const response = await fetchFPLApi(`entry/${managerId}/event/${gameweek}/picks/`);
       
       if (!response.ok) {
         throw new Error('Manager ID not found or invalid');
@@ -132,7 +133,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
         
         // Fetch player's gameweek history to get points for this specific gameweek
         try {
-          const playerResponse = await fetch(`/api/element-summary/${pick.element}/`);
+          const playerResponse = await fetchFPLApi(`element-summary/${pick.element}/`);
           if (playerResponse.ok) {
             const playerData = await playerResponse.json();
             const gwHistory = playerData.history.find(h => h.round === gameweek);
@@ -239,8 +240,8 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
     setLeagueUserPosition(null);
 
     try {
-      const endpoint = type === 'h2h' ? `/api/leagues-h2h/${leagueId}/standings/` : `/api/leagues-classic/${leagueId}/standings/`;
-      const res = await fetch(endpoint);
+      const endpoint = type === 'h2h' ? `leagues-h2h/${leagueId}/standings/` : `leagues-classic/${leagueId}/standings/`;
+      const res = await fetchFPLApi(endpoint);
       if (!res.ok) throw new Error('Failed to load league standings');
       const data = await res.json();
 
@@ -322,7 +323,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
     
     try {
       // fetch entry picks
-      const picksRes = await fetch(`/api/entry/${entryId}/event/${gameweek}/picks/`);
+      const picksRes = await fetchFPLApi(`entry/${entryId}/event/${gameweek}/picks/`);
       if (!picksRes.ok) throw new Error('Failed to fetch selected team');
       const picksData = await picksRes.json();
 
@@ -330,7 +331,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
       const enrichedPicks = await Promise.all(picksData.picks.map(async pick => {
         const player = allPlayers.find(p => p.id === pick.element);
         try {
-          const playerResponse = await fetch(`/api/element-summary/${pick.element}/`);
+          const playerResponse = await fetchFPLApi(`element-summary/${pick.element}/`);
           if (playerResponse.ok) {
             const playerData = await playerResponse.json();
             const gwHistory = playerData.history.find(h => h.round === gameweek);
@@ -358,7 +359,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
 
       // fetch entry manager details to display name/team and populate leagues
       try {
-        const managerRes = await fetch(`/api/entry/${entryId}/`);
+        const managerRes = await fetchFPLApi(`entry/${entryId}/`);
         if (managerRes.ok) {
           const m = await managerRes.json();
           setManagerInfo({

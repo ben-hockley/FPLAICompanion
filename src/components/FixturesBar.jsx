@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import FixtureModal from './FixtureModal';
 import { TEAM_BADGES } from '../utils/teamBadges';
+import { fetchFPLApi } from '../utils/api';
 
 const FixturesBar = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
   const [fixtures, setFixtures] = useState([]);
@@ -18,7 +19,7 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
       setLoading(true);
       
       // Fetch current gameweek info
-      const bootstrapResponse = await fetch('/api/bootstrap-static/');
+      const bootstrapResponse = await fetchFPLApi('bootstrap-static/');
       const bootstrapData = await bootstrapResponse.json();
       const currentGW = bootstrapData.events.find(event => event.is_current)?.id || 15;
       setCurrentGameweek(currentGW);
@@ -28,7 +29,7 @@ const FixturesBar = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
       setDisplayedGameweek(targetGW);
       
       // Fetch all fixtures
-      const fixturesResponse = await fetch('/api/fixtures/');
+      const fixturesResponse = await fetchFPLApi('fixtures/');
       const fixturesData = await fixturesResponse.json();
       
       // Filter fixtures for target gameweek and sort by kickoff time

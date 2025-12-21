@@ -7,6 +7,7 @@ import LeagueTableModal from './LeagueTableModal';
 import { getCountryCode } from '../utils/regionFlags';
 import * as flags from 'country-flag-icons/react/3x2';
 import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
+import { fetchFPLApi } from '../utils/api';
 
 const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTeamClick }) => {
   const [teamPlayers, setTeamPlayers] = useState({ GK: [], DEF: [], MID: [], FWD: [] });
@@ -47,11 +48,11 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
   const calculateLeaguePosition = async () => {
     try {
       // Fetch all fixtures
-      const response = await fetch('/api/fixtures/');
+      const response = await fetchFPLApi('fixtures/');
       const fixtures = await response.json();
 
       // Fetch teams for names
-      const bootstrapResponse = await fetch('/api/bootstrap-static/');
+      const bootstrapResponse = await fetchFPLApi('bootstrap-static/');
       const bootstrapData = await bootstrapResponse.json();
       
       const teamMap = {};
@@ -121,11 +122,11 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
     setLoadingFixtures(true);
     try {
       // Fetch all fixtures
-      const fixturesResponse = await fetch('/api/fixtures/');
+      const fixturesResponse = await fetchFPLApi('fixtures/');
       const fixturesData = await fixturesResponse.json();
 
       // Fetch teams for names
-      const bootstrapResponse = await fetch('/api/bootstrap-static/');
+      const bootstrapResponse = await fetchFPLApi('bootstrap-static/');
       const bootstrapData = await bootstrapResponse.json();
       
       const teamMap = {};

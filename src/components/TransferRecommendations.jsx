@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import StatusIcon from './StatusIcon';
+import { fetchFPLApi } from '../utils/api';
 
 const TransferRecommendations = ({ isOpen, onClose, teamData, allPlayers, teams }) => {
   const [recommendations, setRecommendations] = useState(null);
@@ -15,7 +16,7 @@ const TransferRecommendations = ({ isOpen, onClose, teamData, allPlayers, teams 
 
   const fetchFixtures = async () => {
     try {
-      const response = await fetch('/api/fixtures/');
+      const response = await fetchFPLApi('fixtures/');
       if (response.ok) {
         const data = await response.json();
         setFixtures(data);

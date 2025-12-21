@@ -12,6 +12,7 @@ import PredictedPoints from './pages/PredictedPoints'
 import LeagueTable from './pages/LeagueTable'
 import PlayerModal from './components/PlayerModal'
 import TeamModal from './components/TeamModal'
+import { fetchFPLApi } from './utils/api'
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -29,7 +30,7 @@ function App() {
   const fetchFPLData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/bootstrap-static/');
+      const response = await fetchFPLApi('bootstrap-static/');
       
       if (!response.ok) {
         throw new Error(`FPL API returned ${response.status}`);
