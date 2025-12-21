@@ -28,7 +28,9 @@ const getApiBaseUrl = () => {
  */
 export const fetchFPLApi = async (endpoint) => {
   const baseUrl = getApiBaseUrl();
-  const url = `${baseUrl}/${endpoint}`;
+  // Remove leading slash from endpoint if present, ensure no double slashes
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  const url = `${baseUrl}/${cleanEndpoint}`;
   
   return fetch(url);
 };
