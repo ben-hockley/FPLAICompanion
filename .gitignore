@@ -27,4 +27,8 @@ dist-ssr
 coverage/
 config/
 
+# Static FPL data (regenerated at build time)
+public/fpl-data/
+
 edit.html
+

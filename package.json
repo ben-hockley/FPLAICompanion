@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "fetch-data": "node scripts/fetch-fpl-data.js",
+    "build": "npm run fetch-data && vite build",
     "preview": "vite preview",
     "test": "jest",
     "test:watch": "jest --watch",

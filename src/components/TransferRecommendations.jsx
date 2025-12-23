@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchFPL } from '../utils/fplApi';
 import StatusIcon from './StatusIcon';
 
 const TransferRecommendations = ({ isOpen, onClose, teamData, allPlayers, teams }) => {
@@ -15,14 +16,9 @@ const TransferRecommendations = ({ isOpen, onClose, teamData, allPlayers, teams 
 
   const fetchFixtures = async () => {
     try {
-      const response = await fetch('/api/fixtures/');
-      if (response.ok) {
-        const data = await response.json();
-        setFixtures(data);
-        generateRecommendations(data);
-      } else {
-        generateRecommendations([]);
-      }
+      const data = await fetchFPL('fixtures');
+      setFixtures(data);
+      generateRecommendations(data);
     } catch (err) {
       console.error('Failed to fetch fixtures:', err);
       generateRecommendations([]);

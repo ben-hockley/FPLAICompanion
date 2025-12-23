@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchFPL } from '../utils/fplApi';
 import FixturesCarousel from '../components/FixturesCarousel';
 import TopPicks from '../components/TopPicks';
 import NewsCarousel from '../components/NewsCarousel';
@@ -11,9 +12,7 @@ const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
     let mounted = true;
     const fetchBootstrap = async () => {
       try {
-        const res = await fetch('/api/bootstrap-static/');
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await fetchFPL('bootstrap-static');
         
         // Find earliest incomplete gameweek
         // A gameweek is incomplete if it hasn't finished OR if it's current and has started

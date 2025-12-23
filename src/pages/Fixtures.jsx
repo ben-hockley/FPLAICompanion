@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { fetchFPL } from '../utils/fplApi';
 import FixtureModal from '../components/FixtureModal';
 import { TEAM_BADGES } from '../utils/teamBadges';
 
@@ -20,16 +21,14 @@ const Fixtures = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
     try {
       setLoading(true);
       
-      const bootstrapResponse = await fetch('/api/bootstrap-static/');
-      const bootstrapData = await bootstrapResponse.json();
+      const bootstrapData = await fetchFPL('bootstrap-static');
       const currentGW = bootstrapData.events.find(event => event.is_current)?.id || 15;
       setCurrentGameweek(currentGW);
       
       const targetGW = gw || currentGW;
       setDisplayedGameweek(targetGW);
       
-      const fixturesResponse = await fetch('/api/fixtures/');
-      const fixturesData = await fixturesResponse.json();
+      const fixturesData = await fetchFPL('fixtures');
       
       const gwFixtures = fixturesData
         .filter(fixture => fixture.event === targetGW)

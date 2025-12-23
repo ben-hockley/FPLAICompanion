@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { fetchFPL, fetchFPLDynamic } from '../utils/fplApi';
 import StatusIcon from './StatusIcon';
 import { getCountryCode } from '../utils/regionFlags';
 import * as flags from 'country-flag-icons/react/3x2';
@@ -43,19 +44,11 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
       setLoading(true);
       setError(null);
       
-      // Fetch player details
-      const detailsResponse = await fetch(`/api/element-summary/${player.id}/`);
-      if (!detailsResponse.ok) {
-        throw new Error(`Failed to fetch player details (${detailsResponse.status})`);
-      }
-      const detailsData = await detailsResponse.json();
+      // Fetch player details (dynamic endpoint - can't be pre-fetched)
+      const detailsData = await fetchFPLDynamic(`element-summary/${player.id}`);
       
-      // Fetch all fixtures
-      const fixturesResponse = await fetch('/api/fixtures/');
-      let fixturesData = [];
-      if (fixturesResponse.ok) {
-        fixturesData = await fixturesResponse.json();
-      }
+      // Fetch all fixtures (static endpoint - has fallback)
+      const fixturesData = await fetchFPL('fixtures');
       
       // Get upcoming fixtures for this player's team
       const upcomingFixtures = fixturesData

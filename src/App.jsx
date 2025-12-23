@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { fetchFPL } from './utils/fplApi'
 import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
@@ -29,13 +30,9 @@ function App() {
   const fetchFPLData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/bootstrap-static/');
-      
-      if (!response.ok) {
-        throw new Error(`FPL API returned ${response.status}`);
-      }
+      const data = await fetchFPL('bootstrap-static');
 
-      const data = await response.json();
+      console.log('FPL data loaded:', data);
       
       // Create team map
       const teamMap = {};

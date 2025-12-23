@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchFPL } from '../utils/fplApi';
 import { TEAM_BADGES } from '../utils/teamBadges';
 
 const LeagueTable = ({ teams, onTeamClick }) => {
@@ -16,12 +17,7 @@ const LeagueTable = ({ teams, onTeamClick }) => {
       setError(null);
 
       // Fetch all fixtures
-      const response = await fetch('/api/fixtures/');
-      if (!response.ok) {
-        throw new Error(`Failed to fetch fixtures (${response.status})`);
-      }
-
-      const fixtures = await response.json();
+      const fixtures = await fetchFPL('fixtures');
 
       // Initialize table data for each team
       const table = {};
