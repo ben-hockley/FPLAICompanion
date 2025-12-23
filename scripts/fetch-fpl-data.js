@@ -97,6 +97,48 @@ async function fetchPlayerSummaries(players) {
   return successCount;
 }
 
+async function fetchGameweekLiveData(events) {
+  // Filter to finished gameweeks only
+  const finishedEvents = events.filter(e => e.finished);
+  
+  console.log(`\nFetching live data for ${finishedEvents.length} finished gameweeks...`);
+  
+  const eventDir = path.join(OUTPUT_DIR, 'event');
+  if (!fs.existsSync(eventDir)) {
+    fs.mkdirSync(eventDir, { recursive: true });
+  }
+  
+  const DELAY_MS = 100; // Slightly slower for these larger files
+  let successCount = 0;
+  
+  for (const event of finishedEvents) {
+    try {
+      await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+      
+      console.log(`Fetching gameweek ${event.id} live data...`);
+      const response = await fetch(`${FPL_API_BASE}/event/${event.id}/live/`);
+      
+      if (!response.ok) {
+        console.warn(`Failed to fetch GW ${event.id} live data: ${response.status}`);
+        continue;
+      }
+      
+      const data = await response.json();
+      const filepath = path.join(eventDir, `${event.id}-live.json`);
+      fs.writeFileSync(filepath, JSON.stringify(data));
+      
+      const sizeKB = (fs.statSync(filepath).size / 1024).toFixed(2);
+      console.log(`✓ Saved GW ${event.id} live data (${sizeKB} KB)`);
+      successCount++;
+    } catch (err) {
+      console.warn(`Error fetching GW ${event.id} live data: ${err.message}`);
+    }
+  }
+  
+  console.log(`\n✓ Completed: ${successCount}/${finishedEvents.length} gameweek live data files fetched`);
+  return successCount;
+}
+
 async function main() {
   console.log('Starting FPL data fetch...\n');
   
@@ -116,12 +158,19 @@ async function main() {
     playerSummariesCount = await fetchPlayerSummaries(bootstrapData.elements);
   }
   
+  // Fetch gameweek live data for finished gameweeks
+  let gameweekLiveCount = 0;
+  if (bootstrapData && bootstrapData.events) {
+    gameweekLiveCount = await fetchGameweekLiveData(bootstrapData.events);
+  }
+  
   // Create a metadata file with timestamp
   const metadata = {
     fetchedAt: new Date().toISOString(),
     endpoints: STATIC_ENDPOINTS,
     success: successCount === totalCount,
-    playerSummaries: playerSummariesCount
+    playerSummaries: playerSummariesCount,
+    gameweekLiveData: gameweekLiveCount
   };
   
   fs.writeFileSync(

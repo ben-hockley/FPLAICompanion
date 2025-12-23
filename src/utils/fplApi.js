@@ -100,8 +100,8 @@ function getStaticFilePath(endpoint) {
 
 /**
  * For dynamic endpoints (player details, manager data, etc.)
- * For element-summary, tries static data fallback if available
- * @param {string} endpoint - Full API path (e.g., 'element-summary/123')
+ * For element-summary and event/{id}/live, tries static data fallback if available
+ * @param {string} endpoint - Full API path (e.g., 'element-summary/123', 'event/16/live')
  * @returns {Promise<any>} - JSON response data
  */
 export async function fetchFPLDynamic(endpoint) {
@@ -124,19 +124,30 @@ export async function fetchFPLDynamic(endpoint) {
       return response.json();
     }
     
-    // If live API fails and this is element-summary, try static fallback
+    // If live API fails, try static fallback for supported endpoints
     if (endpoint.startsWith('element-summary/')) {
       console.warn(`Live API failed for ${endpoint}, trying static data...`);
       return await fetchStaticPlayerSummary(endpoint);
+    } else if (endpoint.match(/^event\/\d+\/live/)) {
+      console.warn(`Live API failed for ${endpoint}, trying static data...`);
+      return await fetchStaticEventLive(endpoint);
     }
 
     throw new Error(`FPL API returned ${response.status}`);
   } catch (error) {
-    // If error and this is element-summary, try static fallback
+    // If error, try static fallback for supported endpoints
     if (endpoint.startsWith('element-summary/')) {
       console.warn(`Live API error for ${endpoint}, trying static data...`);
       try {
         return await fetchStaticPlayerSummary(endpoint);
+      } catch (fallbackError) {
+        console.error(`Both live API and static data failed for ${endpoint}`);
+        throw error;
+      }
+    } else if (endpoint.match(/^event\/\d+\/live/)) {
+      console.warn(`Live API error for ${endpoint}, trying static data...`);
+      try {
+        return await fetchStaticEventLive(endpoint);
       } catch (fallbackError) {
         console.error(`Both live API and static data failed for ${endpoint}`);
         throw error;
@@ -169,6 +180,30 @@ async function fetchStaticPlayerSummary(endpoint) {
     return data;
   } catch (error) {
     throw new Error(`Static data not available for player ${playerId}`);
+  }
+}
+
+/**
+ * Fetch gameweek live data from static pre-fetched data
+ * @param {string} endpoint - event live endpoint (e.g., 'event/16/live')
+ * @returns {Promise<any>} - JSON response data
+ */
+async function fetchStaticEventLive(endpoint) {
+  const eventId = endpoint.split('/')[1];
+  const staticFile = `${STATIC_DATA_BASE}/event/${eventId}-live.json`;
+  
+  try {
+    const response = await fetch(staticFile);
+    
+    if (!response.ok) {
+      throw new Error(`Static gameweek data not found: ${staticFile}`);
+    }
+    
+    const data = await response.json();
+    console.log(`✓ Using static data for gameweek: ${eventId}`);
+    return data;
+  } catch (error) {
+    throw new Error(`Static data not available for gameweek ${eventId}`);
   }
 }
 
