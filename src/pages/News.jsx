@@ -188,7 +188,7 @@ const News = () => {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Header Image */}
-          <div className="relative h-96">
+          <div className="relative h-48 sm:h-64 md:h-80 lg:h-96">
             <img
               src={news.image}
               alt={news.title}

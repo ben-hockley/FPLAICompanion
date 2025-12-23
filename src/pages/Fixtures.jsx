@@ -159,21 +159,21 @@ const Fixtures = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
               <div
                 key={fixture.id}
                 onClick={() => setSelectedFixture(fixture)}
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-lg ${
+                className={`border-2 rounded-lg p-2 sm:p-4 cursor-pointer transition-all hover:shadow-lg ${
                   fixture.finished ? 'bg-gray-50 border-gray-300 hover:border-gray-400' : 'bg-white border-blue-200 hover:border-blue-400'
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-1 sm:gap-2">
                   {/* Home Team */}
-                  <div className="flex items-center gap-3 flex-1">
+                  <div className="flex items-center gap-1 sm:gap-3 flex-1 min-w-0">
                     <img
                       src={getTeamBadgeUrl(fixture.team_h)}
                       alt={teams[fixture.team_h]}
-                      className="w-10 h-10 object-contain"
+                      className="w-6 h-6 sm:w-10 sm:h-10 object-contain flex-shrink-0"
                       onError={(e) => e.target.style.display = 'none'}
                     />
                     <span 
-                      className="text-lg font-semibold text-gray-800 hover:text-blue-600 hover:underline"
+                      className="text-xs sm:text-lg font-semibold text-gray-800 hover:text-blue-600 hover:underline truncate"
                       onClick={(e) => {
                         e.stopPropagation();
                         onTeamClick && onTeamClick(fixture.team_h);
@@ -184,26 +184,26 @@ const Fixtures = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
                   </div>
 
                   {/* Score or Time */}
-                  <div className="px-6 text-center">
+                  <div className="px-2 sm:px-6 text-center flex-shrink-0">
                     {fixture.finished ? (
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl font-bold text-gray-900">{fixture.team_h_score}</span>
+                      <div className="flex items-center gap-1 sm:gap-3">
+                        <span className="text-lg sm:text-2xl font-bold text-gray-900">{fixture.team_h_score}</span>
                         <span className="text-gray-400">-</span>
-                        <span className="text-2xl font-bold text-gray-900">{fixture.team_a_score}</span>
+                        <span className="text-lg sm:text-2xl font-bold text-gray-900">{fixture.team_a_score}</span>
                       </div>
                     ) : fixture.started ? (
-                      <span className="text-sm font-medium text-red-600 animate-pulse">Live</span>
+                      <span className="text-xs sm:text-sm font-medium text-red-600 animate-pulse">Live</span>
                     ) : (
-                      <span className="text-sm text-gray-600">
+                      <span className="text-xs sm:text-sm text-gray-600">
                         {formatKickoffTime(fixture.kickoff_time)}
                       </span>
                     )}
                   </div>
 
                   {/* Away Team */}
-                  <div className="flex items-center gap-3 flex-1 justify-end">
+                  <div className="flex items-center gap-1 sm:gap-3 flex-1 justify-end min-w-0">
                     <span 
-                      className="text-lg font-semibold text-gray-800 hover:text-blue-600 hover:underline"
+                      className="text-xs sm:text-lg font-semibold text-gray-800 hover:text-blue-600 hover:underline truncate"
                       onClick={(e) => {
                         e.stopPropagation();
                         onTeamClick && onTeamClick(fixture.team_a);
@@ -214,7 +214,7 @@ const Fixtures = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
                     <img
                       src={getTeamBadgeUrl(fixture.team_a)}
                       alt={teams[fixture.team_a]}
-                      className="w-10 h-10 object-contain"
+                      className="w-6 h-6 sm:w-10 sm:h-10 object-contain flex-shrink-0"
                       onError={(e) => e.target.style.display = 'none'}
                     />
                   </div>
