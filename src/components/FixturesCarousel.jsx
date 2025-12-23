@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchFPL } from '../utils/fplApi';
 import FixtureModal from './FixtureModal';
 import { TEAM_BADGES } from '../utils/teamBadges';
 
@@ -32,8 +33,7 @@ const FixturesCarousel = ({ teams, allPlayers, onPlayerClick, onTeamClick, gamew
       setLoading(true);
       setCurrentGameweek(gw);
       
-      const fixturesResponse = await fetch('/api/fixtures/');
-      const fixturesData = await fixturesResponse.json();
+      const fixturesData = await fetchFPL('fixtures');
       
       const gwFixtures = fixturesData
         .filter(fixture => fixture.event === gw)
