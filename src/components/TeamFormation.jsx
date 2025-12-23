@@ -121,17 +121,6 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
       const response = await fetch(`/api/entry/${managerId}/event/${gameweek}/picks/`);
       
       if (!response.ok) {
-        // Detect static GitHub Pages hosting and provide helpful guidance
-        try {
-          const hostname = typeof window !== 'undefined' && window.location && window.location.hostname;
-          // Replace this with the actual hostname, and remove if feature is now working. (Non-Static deployment)
-          if (hostname && hostname.includes('github.io')) {
-            throw new Error('Sorry, this feature is not available currently, for more details visit https://github.com/ben-hockley/FPLAICompanion/blob/main/README.md#Depoloyment');
-          }
-        } catch (e) {
-          // ignore access errors to window
-        }
-
         throw new Error('Sorry, this feature is not available currently. Check back later!');
       }
 
