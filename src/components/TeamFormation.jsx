@@ -121,7 +121,25 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
       const response = await fetch(`/api/entry/${managerId}/event/${gameweek}/picks/`);
       
       if (!response.ok) {
-        throw new Error('Manager ID not found or invalid');
+        // Detect static GitHub Pages hosting and provide helpful guidance
+        try {
+          const hostname = typeof window !== 'undefined' && window.location && window.location.hostname;
+          // Replace this with the actual hostname, and remove if feature is now working. (Non-Static deployment)
+          if (hostname && hostname.includes('github.io')) {
+            throw new Error('Sorry, this feature is not available currently, for more details visit https://github.com/ben-hockley/FPLAICompanion/blob/main/README.md#Depoloyment');
+          }
+        } catch (e) {
+          // ignore access errors to window
+        }
+
+        // Try to include any useful server-provided message
+        let bodyText = null;
+        try {
+          bodyText = await response.text();
+        } catch (e) {
+          /* ignore */
+        }
+        throw new Error(bodyText || `Manager ID not found or invalid (status ${response.status})`);
       }
 
       const data = await response.json();
