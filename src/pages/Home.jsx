@@ -4,6 +4,7 @@ import FixturesCarousel from '../components/FixturesCarousel';
 import TopPicks from '../components/TopPicks';
 import NewsCarousel from '../components/NewsCarousel';
 import FPLLeaders from '../components/FPLLeaders';
+import FPLGenieLogo from '../assets/FPL_Genie_Logo.png';
 
 const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
   const [currentGameweek, setCurrentGameweek] = useState(null);
@@ -39,7 +40,7 @@ const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
         {/* Title banner */}
         <div className="flex items-center gap-4 mb-6">
           <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-md">
-            <img src="/src/assets/FPL_Genie_Logo.png" alt="FPL Genie" className="w-12 h-12 rounded-full object-cover" />
+            <img src={FPLGenieLogo} alt="FPL Genie" className="w-12 h-12 rounded-full object-cover" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">FPL Genie: Gameweek {currentGameweek ?? '—'}</h1>

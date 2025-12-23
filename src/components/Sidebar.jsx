@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import fplGenieLogo from '../assets/FPL_Genie_Logo.png';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -77,7 +78,7 @@ const Sidebar = () => {
       <div className="py-4 px-2 border-b border-blue-500/30">
         <div className="flex flex-col items-center">
           <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center mb-2 shadow-lg">
-            <img src='/src/assets/FPL_Genie_Logo.png' alt="FPL Genie" className="w-12 h-12 rounded-full object-cover" />
+            <img src={fplGenieLogo} alt="FPL Genie" className="w-12 h-12 rounded-full object-cover" />
           </div>
           <span className="text-[10px] font-semibold text-white text-center leading-tight">FPL Genie</span>
         </div>
