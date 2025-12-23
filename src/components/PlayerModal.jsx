@@ -107,10 +107,10 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
   if (loading) {
     return (
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn"
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn p-2 sm:p-4"
         onClick={handleBackdropClick}
       >
-        <div className="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="bg-white rounded-lg p-4 sm:p-8 max-w-4xl w-full max-h-[95vh] overflow-y-auto">
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
           </div>
@@ -122,10 +122,10 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
   if (error) {
     return (
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn"
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn p-2 sm:p-4"
         onClick={handleBackdropClick}
       >
-        <div className="bg-white rounded-lg p-8 max-w-4xl w-full mx-4">
+        <div className="bg-white rounded-lg p-4 sm:p-8 max-w-4xl w-full">
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-2xl font-bold text-gray-800">Error</h2>
             <button
@@ -153,10 +153,10 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn p-2 sm:p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-slideUp">
+      <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto animate-slideUp">
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-lg">
           <button

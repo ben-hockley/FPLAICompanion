@@ -93,8 +93,8 @@ const Fixtures = ({ teams, allPlayers, onPlayerClick, onTeamClick }) => {
   }
 
   return (
-    <div className="p-4 md:px-8 pb-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="p-2 sm:p-4 md:px-6 pb-8">
+      <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6">
           {/* Header with Navigation */}
           <div className="flex items-center justify-center gap-3 mb-6">

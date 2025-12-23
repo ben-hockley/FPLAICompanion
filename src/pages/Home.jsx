@@ -35,23 +35,28 @@ const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
   }, []);
 
   return (
-    <div className="p-4 md:px-8 pb-8">
+    <div className="p-2 sm:p-4 md:px-6 pb-8">
       <div className="max-w-full mx-auto">
         {/* Title banner */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-md">
-            <img src={FPLGenieLogo} alt="FPL Genie" className="w-12 h-12 rounded-full object-cover" />
+        <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+            <img src={FPLGenieLogo} alt="FPL Genie" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">FPL Genie: Gameweek {currentGameweek ?? '—'}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">FPL Genie: Gameweek {currentGameweek ?? '—'}</h1>
           </div>
         </div>
 
-        <div className="flex gap-6">
-          {/* Left Column: Fixtures and Top Picks - 1/3 width */}
-          <div className="flex flex-col gap-6" style={{ width: 'calc((100vw - 6rem) / 3)' }}>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+          {/* News Carousel - First on mobile, right on desktop */}
+          <div className="xl:hidden w-full">
+            <NewsCarousel />
+          </div>
+          
+          {/* Left Column: Fixtures and Top Picks */}
+          <div className="flex flex-col gap-4 sm:gap-6">
             {/* Fixtures Carousel */}
-            <div className="min-w-[300px]">
+            <div className="w-full">
               <FixturesCarousel 
                 teams={teams} 
                 allPlayers={players}
@@ -62,7 +67,7 @@ const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
             </div>
             
             {/* Top Picks */}
-            <div className="min-w-[300px]">
+            <div className="w-full">
               <TopPicks 
                 allPlayers={players}
                 teams={teams}
@@ -71,9 +76,12 @@ const Home = ({ players, teams, onPlayerClick, onTeamClick }) => {
             </div>
           </div>
 
-          {/* Right Column: News Carousel and FPL Leaders - 2/3 width */}
-          <div style={{ width: 'calc((100vw - 6rem) * 2 / 3)' }} className="min-w-[500px] flex flex-col gap-6">
-            <NewsCarousel />
+          {/* Right Column: News Carousel and FPL Leaders - Desktop only for news */}
+          <div className="xl:col-span-2 flex flex-col gap-4 sm:gap-6">
+            {/* News Carousel - Hidden on mobile */}
+            <div className="hidden xl:block">
+              <NewsCarousel />
+            </div>
             
             {/* FPL Leaders Section */}
             <FPLLeaders 

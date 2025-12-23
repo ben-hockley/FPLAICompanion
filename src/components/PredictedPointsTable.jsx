@@ -303,72 +303,72 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-blue-600 text-white sticky top-0">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                                <th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                                     Rank
                                 </th>
                                 <th 
                                     onClick={() => handleSort('name')}
-                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
                                     Player {getSortIndicator('name')}
                                 </th>
                                 <th 
                                     onClick={() => handleSort('team')}
-                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
                                     Team {getSortIndicator('team')}
                                 </th>
                                 <th 
                                     onClick={() => handleSort('position')}
-                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
-                                    Position {getSortIndicator('position')}
+                                    Pos {getSortIndicator('position')}
                                 </th>
                                 <th 
                                     onClick={() => handleSort('cost')}
-                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
                                     Cost {getSortIndicator('cost')}
                                 </th>
                                 <th 
                                     onClick={() => handleSort('fixtures')}
-                                    className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="hidden lg:table-cell px-3 sm:px-6 py-3 text-center text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
-                                    Fixtures {getSortIndicator('fixtures')}
+                                    Fix {getSortIndicator('fixtures')}
                                 </th>
                                 <th 
                                     onClick={() => handleSort('nailedness')}
-                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="hidden xl:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
-                                    Nailedness {getSortIndicator('nailedness')}
+                                    Nail {getSortIndicator('nailedness')}
                                 </th>
                                 <th 
                                     onClick={() => handleSort('goal_prob')}
-                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
-                                    Goal % {getSortIndicator('goal_prob')}
+                                    Goal% {getSortIndicator('goal_prob')}
                                 </th>
                                 <th 
                                     onClick={() => handleSort('assist_prob')}
-                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
-                                    Assist % {getSortIndicator('assist_prob')}
+                                    Ast% {getSortIndicator('assist_prob')}
                                 </th>
                                 <th 
                                     onClick={() => handleSort('clean_sheet_prob')}
-                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="hidden xl:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
-                                    CS % {getSortIndicator('clean_sheet_prob')}
+                                    CS% {getSortIndicator('clean_sheet_prob')}
                                 </th>
                                 <th 
                                     onClick={() => handleSort('predicted_points')}
-                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
-                                    Predicted Pts {getSortIndicator('predicted_points')}
+                                    <span className="hidden sm:inline">Predicted </span>Pts {getSortIndicator('predicted_points')}
                                 </th>
                                 <th 
                                     onClick={() => handleSort('roi')}
-                                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                                    className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                                 >
                                     ROI {getSortIndicator('roi')}
                                 </th>
@@ -385,17 +385,17 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick
                                         isInMyTeam ? 'bg-blue-100' : ''
                                     }`}
                                 >
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td className="hidden sm:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {index + 1}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         <div className="flex items-center gap-2">
                                             {player.name}
                                             <StatusIcon status={player.status} news={player.news} />
                                         </div>
                                     </td>
                                     <td 
-                                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 cursor-pointer hover:text-blue-600 hover:underline"
+                                        className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700 cursor-pointer hover:text-blue-600 hover:underline"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onTeamClick && onTeamClick(player.team_id);
@@ -403,7 +403,7 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick
                                     >
                                         {player.team}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         <span className={`px-2 py-1 rounded text-xs font-semibold
                                             ${player.position === 'GK' ? 'bg-yellow-200 text-yellow-800' : ''}
                                             ${player.position === 'DEF' ? 'bg-green-200 text-green-800' : ''}
@@ -413,10 +413,10 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick
                                             {player.position}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         £{player.cost.toFixed(1)}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                    <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                                         {player.fixtures > 1 && (
                                             <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
                                                 DGW ({player.fixtures})
@@ -426,7 +426,7 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick
                                         {player.fixtures === 0 && <span className="text-red-500">BGW</span>}
                                     </td>
                                     <td 
-                                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 cursor-pointer hover:text-blue-600 hover:underline"
+                                        className="hidden xl:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700 cursor-pointer hover:text-blue-600 hover:underline"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onTeamClick && onTeamClick(player.team_id);
@@ -434,19 +434,19 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick
                                     >
                                         {player.nailedness}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {formatPercentage(player.goal_prob)}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {formatPercentage(player.assist_prob)}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    <td className="hidden xl:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {formatPercentage(player.clean_sheet_prob)}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                                         {player.predicted_points}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    <td className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {player.roi}
                                     </td>
                                 </tr>

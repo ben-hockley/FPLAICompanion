@@ -147,8 +147,8 @@ const LeagueTable = ({ teams, onTeamClick }) => {
   }
 
   return (
-    <div className="p-4 md:px-8 pb-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="p-2 sm:p-4 md:px-6 pb-8">
+      <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-gray-200">
             Premier League Table

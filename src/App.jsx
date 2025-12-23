@@ -102,8 +102,8 @@ function App() {
           onTeamClick={handleTeamClick}
         />
         
-        {/* Main content area with left margin for sidebar and top padding for navbar */}
-        <div className="ml-24 pt-16">
+        {/* Main content area with responsive left margin for sidebar and top padding for navbar */}
+        <div className="lg:ml-24 pt-14 sm:pt-16 pb-16 lg:pb-2 px-2 sm:px-4">
           <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route 

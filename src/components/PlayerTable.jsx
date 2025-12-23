@@ -217,53 +217,53 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
               <tr>
                 <th
                   onClick={() => handleSort('web_name')}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                  className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                 >
                   Player {getSortIndicator('web_name')}
                 </th>
                 <th 
                   onClick={() => handleSort('team')}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                  className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                 >
                   Team {getSortIndicator('team')}
                 </th>
                 <th 
                   onClick={() => handleSort('element_type')}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                  className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                 >
-                  Position {getSortIndicator('element_type')}
+                  Pos {getSortIndicator('element_type')}
                 </th>
                 <th 
                   onClick={() => handleSort('now_cost')}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                  className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                 >
                   Price {getSortIndicator('now_cost')}
                 </th>
                 <th 
                   onClick={() => handleSort('total_points')}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                  className="px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                 >
-                  Total Points {getSortIndicator('total_points')}
+                  <span className="hidden sm:inline">Total </span>Pts {getSortIndicator('total_points')}
                 </th>
                 <th 
                   onClick={() => handleSort('points_per_game')}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                  className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                 >
                   Points/Game {getSortIndicator('points_per_game')}
                 </th>
                 <th 
                   onClick={() => handleSort('form')}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                  className="hidden xl:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                 >
                   Form {getSortIndicator('form')}
                 </th>
                 <th 
                   onClick={() => handleSort('selected_by_percent')}
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
+                  className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-blue-700 transition"
                 >
-                  Selected % {getSortIndicator('selected_by_percent')}
+                  Sel% {getSortIndicator('selected_by_percent')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                <th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                   Set-Pieces
                 </th>
               </tr>
@@ -279,14 +279,14 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
                     isInMyTeam ? 'bg-blue-100' : ''
                   }`}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <div className="flex items-center gap-2">
                       {player.web_name}
                       <StatusIcon status={player.status} news={player.news} />
                     </div>
                   </td>
                   <td 
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 cursor-pointer hover:text-blue-600 hover:underline"
+                    className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700 cursor-pointer hover:text-blue-600 hover:underline"
                     onClick={(e) => {
                       e.stopPropagation();
                       onTeamClick && onTeamClick(player.team);
@@ -294,7 +294,7 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
                   >
                     {teams[player.team]}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     <span className={`px-2 py-1 rounded text-xs font-semibold
                       ${player.element_type === 1 ? 'bg-yellow-200 text-yellow-800' : ''}
                       ${player.element_type === 2 ? 'bg-green-200 text-green-800' : ''}
@@ -304,22 +304,22 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
                       {POSITION_MAP[player.element_type]}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     £{(player.now_cost / 10).toFixed(1)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                     {player.total_points}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {player.points_per_game}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <td className="hidden xl:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {player.form}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {player.selected_by_percent}%
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div className="flex items-center gap-1">
                       {player.penalties_order === 1 && (
                         <span 
