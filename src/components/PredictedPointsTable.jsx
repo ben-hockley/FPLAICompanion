@@ -7,8 +7,7 @@
  * - Uses ICT Index to estimate goal and assist probabilities.
  */
 
-// Use the dev-server proxy at `/api` to avoid CORS in the browser.
-const BASE_URL = '/api';
+import { fetchFPL } from '../utils/fplApi';
 
 class FPLPredictor {
     constructor() {
@@ -21,10 +20,7 @@ class FPLPredictor {
         console.log("Initializing FPL Data...");
         
         try {
-            const bootstrapRes = await fetch(`${BASE_URL}/bootstrap-static/`);
-            if (!bootstrapRes.ok) throw new Error("API Fetch Failed");
-
-            this.bootstrap = await bootstrapRes.json();
+            this.bootstrap = await fetchFPL('bootstrap-static');
 
             // Build team name lookup
             this.bootstrap.teams.forEach(team => {
@@ -138,7 +134,6 @@ class FPLPredictor {
 import { useState, useEffect } from 'react';
 import PlayerModal from './PlayerModal';
 import StatusIcon from './StatusIcon';
-import { fetchFPL } from '../utils/fplApi';
 
 export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick }) {
     const [allPlayers, setAllPlayers] = useState([]);
