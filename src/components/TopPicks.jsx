@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// Use the dev-server proxy at `/api` to avoid CORS in the browser.
-const BASE_URL = '/api';
+import { fetchFPL } from '../utils/fplApi';
 
 class FPLPredictor {
     constructor() {
@@ -14,10 +12,7 @@ class FPLPredictor {
 
     async init() {
         try {
-            const bootstrapRes = await fetch(`${BASE_URL}/bootstrap-static/`);
-            if (!bootstrapRes.ok) throw new Error("API Fetch Failed");
-
-            this.bootstrap = await bootstrapRes.json();
+            this.bootstrap = await fetchFPL('bootstrap-static');
 
             // Build team name lookup
             this.bootstrap.teams.forEach(team => {

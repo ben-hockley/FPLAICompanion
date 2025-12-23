@@ -138,6 +138,7 @@ class FPLPredictor {
 import { useState, useEffect } from 'react';
 import PlayerModal from './PlayerModal';
 import StatusIcon from './StatusIcon';
+import { fetchFPL } from '../utils/fplApi';
 
 export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick }) {
     const [allPlayers, setAllPlayers] = useState([]);
@@ -167,9 +168,8 @@ export default function PredictedPointsTable({ myTeamPlayerIds = [], onTeamClick
             try {
                 setLoading(true);
                 
-                // Fetch full player data for modal
-                const response = await fetch('/api/bootstrap-static/');
-                const data = await response.json();
+                // Fetch full player data for modal (uses static fallback)
+                const data = await fetchFPL('bootstrap-static');
                 
                 // Create team map
                 const teamMap = {};

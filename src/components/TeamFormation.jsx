@@ -6,6 +6,7 @@ import { getCountryCode } from '../utils/regionFlags';
 import * as flags from 'country-flag-icons/react/3x2';
 import { EnglandFlag, ScotlandFlag, WalesFlag, NorthernIrelandFlag } from '../utils/UKFlags';
 import { TEAM_BADGES } from '../utils/teamBadges';
+import { fetchFPL } from '../utils/fplApi';
 
 const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
   const [managerId, setManagerId] = useState('');
@@ -27,9 +28,8 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
   const [leagueUserPosition, setLeagueUserPosition] = useState(null);
 
   const [CURRENT_GAMEWEEK, setCURRENT_GAMEWEEK] = useState(() => {
-    // Kick off async fetch once during initial render to avoid adding useEffect import
-    fetch('/api/bootstrap-static/')
-      .then(res => res.ok ? res.json() : null)
+    // Kick off async fetch once during initial render
+    fetchFPL('bootstrap-static')
       .then(data => {
         if (!data) return;
         const gw = data.current_event
