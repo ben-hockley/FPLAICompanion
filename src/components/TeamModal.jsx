@@ -29,8 +29,8 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
   const loadTeamSquad = () => {
     setLoading(true);
     
-    // Filter players by team
-    const squad = allPlayers.filter(p => p.team === teamId);
+    // Filter players by team and exclude unavailable players (status 'u')
+    const squad = allPlayers.filter(p => p.team === teamId && p.status !== 'u');
     
     // Sort by position
     const sorted = {

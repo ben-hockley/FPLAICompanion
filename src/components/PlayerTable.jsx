@@ -53,6 +53,11 @@ const PlayerTable = ({ players: initialPlayers, teams: initialTeams, myTeamPlaye
 
   const applyFilters = (playerList) => {
     return playerList.filter(player => {
+      // Filter out unavailable players (status 'u')
+      if (player.status === 'u') {
+        return false;
+      }
+      
       // Player name filter
       if (filters.playerName && !player.web_name.toLowerCase().includes(filters.playerName.toLowerCase())) {
         return false;
