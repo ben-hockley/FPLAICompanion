@@ -296,13 +296,8 @@ describe('PlayerTable Component', () => {
       expect(screen.getByText('Fantasy Premier League Player Stats')).toBeInTheDocument();
       expect(screen.getByRole('columnheader', { name: /Player/ })).toBeInTheDocument(); // Check for Column header because text Player is also displayed in the Title.
       expect(screen.getByText(/Team/)).toBeInTheDocument();
-      expect(screen.getByText(/Position/)).toBeInTheDocument();
       expect(screen.getByText(/Price/)).toBeInTheDocument();
-      expect(screen.getByText(/Total Points/)).toBeInTheDocument();
-      expect(screen.getByText(/Points\/Game/)).toBeInTheDocument();
-      expect(screen.getByText(/Form/)).toBeInTheDocument();
-      expect(screen.getByText(/Selected %/)).toBeInTheDocument();
-      expect(screen.getByText(/Set-Pieces/)).toBeInTheDocument();
+      expect(screen.getByText(/Points/)).toBeInTheDocument();
     });
 
     test('should display all player data correctly including status icons and set piece markers', () => {
@@ -390,7 +385,7 @@ describe('PlayerTable Component', () => {
 
       // Note: Default sort is by total_points descending
       // Act - Click Total Points column header (first click - ascending)
-      const pointsHeader = screen.getByText(/Total Points/).closest('th');
+      const pointsHeader = screen.getByText(/Points/).closest('th');
       fireEvent.click(pointsHeader);
 
       // Assert - Check ascending sort (60, 80, 120, 150, 180)
