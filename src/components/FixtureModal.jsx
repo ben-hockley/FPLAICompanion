@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchFPL, fetchFPLDynamic } from '../utils/fplApi';
 import { TEAM_BADGES } from '../utils/teamBadges';
 
 const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTeamClick }) => {
@@ -27,27 +28,20 @@ const FixtureModal = ({ fixture, teams, allPlayers, onClose, onPlayerClick, onTe
       setLoading(true);
       setError(null);
       
-      // Fetch fixture details
-      const response = await fetch(`/api/fixtures/?event=${fixture.event}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch fixture details (${response.status})`);
-      }
-      
-      const fixturesData = await response.json();
+      // Fetch fixture details (uses static fallback)
+      const fixturesData = await fetchFPL('fixtures');
       const fixtureData = fixturesData.find(f => f.id === fixture.id);
       
       setFixtureDetails(fixtureData);
       
-      // Fetch live gameweek data if match has started
+      // Fetch live gameweek data if match has started (tries live API, no fallback)
       if (fixture.started || fixture.finished) {
         try {
-          const liveResponse = await fetch(`/api/event/${fixture.event}/live/`);
-          if (liveResponse.ok) {
-            const liveGameweekData = await liveResponse.json();
-            setLiveData(liveGameweekData);
-          }
+          const liveGameweekData = await fetchFPLDynamic(`event/${fixture.event}/live`);
+          setLiveData(liveGameweekData);
         } catch (liveErr) {
-          console.error('Failed to fetch live data:', liveErr);
+          console.warn('Live data not available:', liveErr.message);
+          // Continue without live data - fixture details still show
         }
       }
       

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchFPL } from '../utils/fplApi';
 import { TEAM_BADGES } from '../utils/teamBadges';
 import { getTeamWebsite } from '../utils/teamWebsites';
 import StatusIcon from './StatusIcon';
@@ -46,13 +47,11 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
 
   const calculateLeaguePosition = async () => {
     try {
-      // Fetch all fixtures
-      const response = await fetch('/api/fixtures/');
-      const fixtures = await response.json();
+      // Fetch all fixtures (uses static fallback)
+      const fixtures = await fetchFPL('fixtures');
 
-      // Fetch teams for names
-      const bootstrapResponse = await fetch('/api/bootstrap-static/');
-      const bootstrapData = await bootstrapResponse.json();
+      // Fetch teams for names (uses static fallback)
+      const bootstrapData = await fetchFPL('bootstrap-static');
       
       const teamMap = {};
       bootstrapData.teams.forEach(team => {
@@ -120,13 +119,11 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
   const loadTeamFixtures = async () => {
     setLoadingFixtures(true);
     try {
-      // Fetch all fixtures
-      const fixturesResponse = await fetch('/api/fixtures/');
-      const fixturesData = await fixturesResponse.json();
+      // Fetch all fixtures (uses static fallback)
+      const fixturesData = await fetchFPL('fixtures');
 
-      // Fetch teams for names
-      const bootstrapResponse = await fetch('/api/bootstrap-static/');
-      const bootstrapData = await bootstrapResponse.json();
+      // Fetch teams for names (uses static fallback)
+      const bootstrapData = await fetchFPL('bootstrap-static');
       
       const teamMap = {};
       bootstrapData.teams.forEach(team => {
