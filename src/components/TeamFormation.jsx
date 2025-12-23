@@ -132,14 +132,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
           // ignore access errors to window
         }
 
-        // Try to include any useful server-provided message
-        let bodyText = null;
-        try {
-          bodyText = await response.text();
-        } catch (e) {
-          /* ignore */
-        }
-        throw new Error(bodyText || `Manager ID not found or invalid (status ${response.status})`);
+        throw new Error('Sorry, this feature is not available currently. Check back later!');
       }
 
       const data = await response.json();
@@ -190,7 +183,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
         onTeamLoaded(playerIds);
       }
     } catch (err) {
-      setError(err.message);
+      setError('Sorry, this feature is not available currently. Check back later!');
       setLoading(false);
     }
   };
@@ -259,7 +252,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
     try {
       const endpoint = type === 'h2h' ? `/api/leagues-h2h/${leagueId}/standings/` : `/api/leagues-classic/${leagueId}/standings/`;
       const res = await fetch(endpoint);
-      if (!res.ok) throw new Error('Failed to load league standings');
+      if (!res.ok) throw new Error('Sorry, this feature is not available currently. Check back later!');
       const data = await res.json();
 
       // Normalize standings array
@@ -341,7 +334,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
     try {
       // fetch entry picks
       const picksRes = await fetch(`/api/entry/${entryId}/event/${gameweek}/picks/`);
-      if (!picksRes.ok) throw new Error('Failed to fetch selected team');
+      if (!picksRes.ok) throw new Error('Sorry, this feature is not available currently. Check back later!');
       const picksData = await picksRes.json();
 
       // enrich picks similar to fetchTeam
@@ -408,7 +401,7 @@ const TeamFormation = ({ allPlayers, teams, onTeamLoaded, onTeamClick }) => {
         onTeamLoaded(playerIds);
       }
     } catch (err) {
-      setError(err.message || 'Failed to load team');
+      setError('Sorry, this feature is not available currently. Check back later!');
     } finally {
       setLoading(false);
     }
