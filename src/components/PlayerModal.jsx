@@ -157,8 +157,8 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
       onClick={handleBackdropClick}
     >
       <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto animate-slideUp">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-lg">
+        {/* Header - Mobile: only name/flag and position/club are sticky */}
+        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 sm:p-6 rounded-t-lg z-10">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-white hover:text-gray-200 text-3xl leading-none font-light"
@@ -167,7 +167,50 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
             ×
           </button>
           
-          <div className="flex items-start gap-6">
+          {/* Mobile layout - Name/Flag and Position/Club only in sticky header */}
+          <div className="sm:hidden">
+            <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+              {(() => {
+                const countryCode = getCountryCode(player.region);
+                if (countryCode) {
+                  if (countryCode === 'ENG') {
+                    return <EnglandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+                  } else if (countryCode === 'SCT') {
+                    return <ScotlandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+                  } else if (countryCode === 'WLS') {
+                    return <WalesFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+                  } else if (countryCode === 'NIR') {
+                    return <NorthernIrelandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
+                  } else {
+                    const FlagComponent = flags[countryCode];
+                    return FlagComponent ? <FlagComponent className="w-6 h-4 inline-block rounded shadow-sm" title={countryCode} /> : null;
+                  }
+                }
+                return null;
+              })()}
+              {player.first_name} {player.second_name}
+              <StatusIcon status={player.status} news={player.news} className="w-5 h-5 text-xs" />
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              <span 
+                onClick={() => {
+                  if (onTeamClick) {
+                    onClose();
+                    onTeamClick(player.team);
+                  }
+                }}
+                className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:bg-opacity-30 transition"
+              >
+                {teams[player.team]}
+              </span>
+              <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">
+                {POSITION_MAP[player.element_type]}
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop layout - Full header with image */}
+          <div className="hidden sm:flex items-start gap-6">
             <div className="flex-shrink-0">
               <img 
                 src={getPhotoUrl(player.code)} 
@@ -184,7 +227,6 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
                 {(() => {
                   const countryCode = getCountryCode(player.region);
                   if (countryCode) {
-                    // Handle UK countries with custom flags
                     if (countryCode === 'ENG') {
                       return <EnglandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
                     } else if (countryCode === 'SCT') {
@@ -194,7 +236,6 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
                     } else if (countryCode === 'NIR') {
                       return <NorthernIrelandFlag className="w-6 h-4 inline-block rounded shadow-sm" />;
                     } else {
-                      // Use country-flag-icons for other countries
                       const FlagComponent = flags[countryCode];
                       return FlagComponent ? <FlagComponent className="w-6 h-4 inline-block rounded shadow-sm" title={countryCode} /> : null;
                     }
@@ -243,73 +284,107 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
+          {/* Mobile: Player Image - full width with padding */}
+          <div className="sm:hidden mb-4">
+            <img 
+              src={getPhotoUrl(player.code)} 
+              alt={`${player.first_name} ${player.second_name}`}
+              className="w-full h-auto object-contain rounded-lg border-4 border-gray-200 shadow-lg bg-gray-100 px-8"
+              onError={(e) => {
+                e.target.src = 'https://resources.premierleague.com/premierleague25/photos/players/110x140/placeholder.png';
+              }}
+            />
+          </div>
+
+          {/* Mobile: Primary Stats in one row */}
+          <div className="sm:hidden mb-6">
+            <div className="grid grid-cols-4 gap-2">
+              <div className="bg-blue-50 p-2 rounded-lg text-center">
+                <div className="text-xs text-gray-600 mb-1">Price</div>
+                <div className="text-lg font-bold text-gray-800">£{(player.now_cost / 10).toFixed(1)}</div>
+              </div>
+              <div className="bg-green-50 p-2 rounded-lg text-center">
+                <div className="text-xs text-gray-600 mb-1">Points</div>
+                <div className="text-lg font-bold text-gray-800">{player.total_points}</div>
+              </div>
+              <div className="bg-purple-50 p-2 rounded-lg text-center">
+                <div className="text-xs text-gray-600 mb-1">Own%</div>
+                <div className="text-lg font-bold text-gray-800">{player.selected_by_percent}%</div>
+              </div>
+              <div className="bg-yellow-50 p-2 rounded-lg text-center">
+                <div className="text-xs text-gray-600 mb-1">ICT</div>
+                <div className="text-lg font-bold text-gray-800">{player.ict_index}</div>
+              </div>
+            </div>
+          </div>
+
           {/* Stats Overview */}
           <div className="mb-6">
             <h3 className="text-xl font-bold text-gray-800 mb-4">Season Statistics</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-3 gap-2 sm:gap-4">
 
               {/* Universal Stats cards, shown for all 4 positions */}
-              <div className="bg-blue-50 p-4 rounded-lg" title="Average points/match played in the last 30 days." aria-label="Form">
-                <div className="text-sm text-gray-600">Form</div>
-                <div className="text-2xl font-bold text-gray-800">{player.form}</div>
+              <div className="bg-blue-50 p-2 sm:p-4 rounded-lg" title="Average points/match played in the last 30 days." aria-label="Form">
+                <div className="text-xs sm:text-sm text-gray-600">Form</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.form}</div>
               </div>
-              <div className="bg-green-50 p-4 rounded-lg" title="Average points/match this season" aria-label="Points per match">
-                <div className="text-sm text-gray-600">Points/Match</div>
-                <div className="text-2xl font-bold text-gray-800">{player.points_per_game}</div>
+              <div className="bg-green-50 p-2 sm:p-4 rounded-lg" title="Average points/match this season" aria-label="Points per match">
+                <div className="text-xs sm:text-sm text-gray-600">Pts/M</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.points_per_game}</div>
               </div>
-              <div className="bg-purple-50 p-4 rounded-lg" title="Total minutes played this season" aria-label="Minutes Played">
-                <div className="text-sm text-gray-600">Minutes</div>
-                <div className="text-2xl font-bold text-gray-800">{player.minutes}</div>
+              <div className="bg-purple-50 p-2 sm:p-4 rounded-lg" title="Total minutes played this season" aria-label="Minutes Played">
+                <div className="text-xs sm:text-sm text-gray-600">Mins</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.minutes}</div>
               </div>
-              <div className="bg-yellow-50 p-4 rounded-lg" title="Bonus points earned this season, The three best performing players in each match are awarded bonus points." aria-label="Bonus Points">
-                <div className="text-sm text-gray-600">Bonus Points</div>
-                <div className="text-2xl font-bold text-gray-800">{player.bonus}</div>
+              <div className="bg-yellow-50 p-2 sm:p-4 rounded-lg" title="Bonus points earned this season, The three best performing players in each match are awarded bonus points." aria-label="Bonus Points">
+                <div className="text-xs sm:text-sm text-gray-600">Bonus</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.bonus}</div>
               </div>
 
               {/* Stats cards only shown for outfield players (DEF, MID, FWD) */
               player.element_type !== 1 && (
                 <>
-                  <div className="bg-red-50 p-4 rounded-lg" title="Goals scored this season" aria-label="Goals">
-                    <div className="text-sm text-gray-600">Goals</div>
-                    <div className="text-2xl font-bold text-gray-800">{player.goals_scored}</div>
+                  <div className="bg-red-50 p-2 sm:p-4 rounded-lg" title="Goals scored this season" aria-label="Goals">
+                    <div className="text-xs sm:text-sm text-gray-600">Goals</div>
+                    <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.goals_scored}</div>
                   </div>
-                  <div className="bg-indigo-50 p-4 rounded-lg" title="Assists made this season" aria-label="Assists">
-                    <div className="text-sm text-gray-600">Assists</div>
-                    <div className="text-2xl font-bold text-gray-800">{player.assists}</div>
+                  <div className="bg-indigo-50 p-2 sm:p-4 rounded-lg" title="Assists made this season" aria-label="Assists">
+                    <div className="text-xs sm:text-sm text-gray-600">Assists</div>
+                    <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.assists}</div>
                   </div>
-                  <div className="bg-green-50 p-4 rounded-lg" title="Average defensive contributions/match (Clearances, Blocks, Interceptions, Tackles + Ball Recoveries for MID & FWD) this season" aria-label="Defensive Contributions per match">
-                    <div className="text-sm text-gray-600">DefCon/Match</div>
-                    <div className="text-2xl font-bold text-gray-800">{player.defensive_contribution_per_90}</div>
+                  <div className="bg-green-50 p-2 sm:p-4 rounded-lg" title="Average defensive contributions/match (Clearances, Blocks, Interceptions, Tackles + Ball Recoveries for MID & FWD) this season" aria-label="Defensive Contributions per match">
+                    <div className="text-xs sm:text-sm text-gray-600">DefCon</div>
+                    <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.defensive_contribution_per_90}</div>
                   </div>
                 </>
               )}
 
               {/* Clean sheets shown for GK, DEF, MID */
               player.element_type !== 4 && (
-              <div className="bg-teal-50 p-4 rounded-lg" title="Clean sheets kept this season" aria-label="Clean Sheets">
-                <div className="text-sm text-gray-600">Clean Sheets</div>
-                <div className="text-2xl font-bold text-gray-800">{player.clean_sheets}</div>
+              <div className="bg-teal-50 p-2 sm:p-4 rounded-lg" title="Clean sheets kept this season" aria-label="Clean Sheets">
+                <div className="text-xs sm:text-sm text-gray-600">CS</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.clean_sheets}</div>
               </div>
               )}
               {/* Goals conceded shown for GK*/
               player.element_type === 1 && (
-              <div className="bg-orange-50 p-4 rounded-lg" title="Average goals conceded per match this season, -1 point per goal conceded for GK and DEF" aria-label="Goals Conceded per match">
-                <div className="text-sm text-gray-600">Goals Conceded/Match</div>
-                <div className="text-2xl font-bold text-gray-800">{player.goals_conceded_per_90}</div>
+              <div className="bg-orange-50 p-2 sm:p-4 rounded-lg" title="Average goals conceded per match this season, -1 point per goal conceded for GK and DEF" aria-label="Goals Conceded per match">
+                <div className="text-xs sm:text-sm text-gray-600">GC/M</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.goals_conceded_per_90}</div>
               </div>
-            )}
+              )}
 
               {/* Goalkeeper Specific Stats */
               player.element_type === 1 && (
               <>
-              <div className="bg-cyan-50 p-4 rounded-lg" title="Average Saves/Match made this season, GK get 1 point for every 3 saves." aria-label="Saves per match">
-                <div className="text-sm text-gray-600">Saves/Match</div>
-                <div className="text-2xl font-bold text-gray-800">{player.saves_per_90}</div>
+              <div className="bg-cyan-50 p-2 sm:p-4 rounded-lg" title="Average Saves/Match made this season, GK get 1 point for every 3 saves." aria-label="Saves per match">
+                <div className="text-xs sm:text-sm text-gray-600">Saves</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.saves_per_90}</div>
               </div>
-              <div className="bg-purple-50 p-4 rounded-lg" title="Penalty saves made this season, GK get 5 points for every penalty save." aria-label="Penalty Saves">
-                <div className="text-sm text-gray-600">Penalty Saves</div>
-                <div className="text-2xl font-bold text-gray-800">{player.penalties_saved}</div>
+              <div className="bg-purple-50 p-2 sm:p-4 rounded-lg" title="Penalty saves made this season, GK get 5 points for every penalty save." aria-label="Penalty Saves">
+                <div className="text-xs sm:text-sm text-gray-600">Pen Save</div>
+                <div className="text-lg sm:text-2xl font-bold text-gray-800">{player.penalties_saved}</div>
               </div>
               </>
               )}
@@ -377,7 +452,8 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
           {fixtures.length > 0 && (
             <div className="mb-6">
               <h3 className="text-xl font-bold text-gray-800 mb-4">Upcoming Fixtures</h3>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+              {/* Desktop layout */}
+              <div className="hidden sm:grid grid-cols-1 md:grid-cols-5 gap-3">
                 {fixtures.map((fixture, index) => (
                   <div key={index} className="bg-white border-2 border-gray-200 rounded-lg p-4 text-center">
                     <div className="text-xs text-gray-500 mb-2">GW {fixture.gameweek}</div>
@@ -406,6 +482,35 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
                       fixture.difficulty >= 4 ? 'text-red-600' : 'text-yellow-600'
                     }`}>
                       {fixture.difficulty <= 2 ? 'Easy' : fixture.difficulty >= 4 ? 'Hard' : 'Medium'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Mobile layout - minimized, 3 fixtures, color-coded */}
+              <div className="sm:hidden grid grid-cols-3 gap-2">
+                {fixtures.slice(0, 3).map((fixture, index) => (
+                  <div 
+                    key={index} 
+                    className={`rounded-lg p-2 text-center border-2 ${
+                      fixture.difficulty <= 2 ? 'bg-green-100 border-green-300' : 
+                      fixture.difficulty >= 4 ? 'bg-red-100 border-red-300' : 'bg-yellow-100 border-yellow-300'
+                    }`}
+                  >
+                    <div className="text-xs text-gray-600 mb-1">GW{fixture.gameweek}</div>
+                    <div 
+                      className="font-semibold text-xs text-gray-900 mb-1 cursor-pointer hover:text-blue-600 truncate"
+                      onClick={() => {
+                        if (onTeamClick) {
+                          onClose();
+                          onTeamClick(fixture.opponentId);
+                        }
+                      }}
+                      title={`${fixture.isHome ? 'vs' : '@'} ${fixture.opponent}`}
+                    >
+                      {fixture.isHome ? 'vs' : '@'}
+                    </div>
+                    <div className="text-xs font-medium text-gray-800 truncate" title={fixture.opponent}>
+                      {fixture.opponent.length > 8 ? fixture.opponent.substring(0, 8) + '...' : fixture.opponent}
                     </div>
                   </div>
                 ))}
@@ -456,7 +561,8 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
             <div>
               <h3 className="text-xl font-bold text-gray-800 mb-4">Match History</h3>
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <div className="max-h-[300px] overflow-y-auto">
+                {/* Match History Table; Scrollable Vertically and set to scroll to bottom by default */}
+                <div className="max-h-[300px] overflow-y-auto" ref={(el) => { if (el) { el.scrollTop = el.scrollHeight; } }}>
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50 sticky top-0">
                       <tr>
@@ -506,39 +612,39 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
                             {match.minutes}
                           </td>
 
-                          {/* Stat columns for outfield players */
-                          player.element_type !== 1 && (
-                          <>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                            {match.goals_scored}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                            {match.assists}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                            {match.defensive_contribution}
-                          </td>
-                          </>
-                          )}
-
-                          {/* Stat columns for GK, DEF, MID */
-                          player.element_type !== 4 && (
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                              {match.clean_sheets}
-                            </td>
-                          )}
-                          {/* Stat columns for GK and DEF */
-                          player.element_type <= 2 && (
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                              {match.goals_conceded}
-                            </td>
-                          )}
-                          {/* Stat columns for GK */
-                          player.element_type === 1 && (
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                              {match.saves}
-                            </td>
-                          )}
+                          {/* Stat columns for outfield players */}
+                                      {player.element_type !== 1 && (
+                                      <>
+                                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                        {match.goals_scored}
+                                      </td>
+                                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                        {match.assists}
+                                      </td>
+                                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                        {match.defensive_contribution}
+                                      </td>
+                                      </>
+                                      )}
+            
+                                      {/* Stat columns for GK, DEF, MID */}
+                                      {player.element_type !== 4 && (
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                          {match.clean_sheets}
+                                        </td>
+                                      )}
+                                      {/* Stat columns for GK and DEF */}
+                                      {player.element_type <= 2 && (
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                          {match.goals_conceded}
+                                        </td>
+                                      )}
+                                      {/* Stat columns for GK */}
+                                      {player.element_type === 1 && (
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                          {match.saves}
+                                        </td>
+                                      )}
 
                           {/* Universal Stat Column */}
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
@@ -556,7 +662,7 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
 
           {/* ICT Index Breakdown */}
           {players.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 text-center">
               <h3 className="text-xl font-bold mb-4 text-gray-800 flex items-center justify-center gap-2">
                 ICT Index
                 <button
@@ -570,7 +676,8 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
                   </svg>
                 </button>
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Desktop layout */}
+              <div className="hidden sm:grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Influence */}
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200 text-center">
                   <h4 className="text-lg font-semibold text-purple-900 mb-2">Influence</h4>
@@ -617,6 +724,35 @@ const PlayerModal = ({ player, teams, players = [], onClose, onTeamClick }) => {
                       {players.filter(p => p.element_type === player.element_type).length} {' '}
                       {POSITION_MAP[player.element_type]}s.
                     </div>
+                  </div>
+                </div>
+              </div>
+              {/* Mobile layout - single row, smaller text */}
+              <div className="sm:hidden grid grid-cols-3 gap-2">
+                {/* Influence */}
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-2 border border-purple-200 text-center">
+                  <h4 className="text-xs font-semibold text-purple-900 mb-1">Influence</h4>
+                  <div className="text-xl font-bold text-purple-700">{player.influence}</div>
+                  <div className="text-xs text-gray-600">
+                    #{player.influence_rank_type}
+                  </div>
+                </div>
+
+                {/* Creativity */}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-2 border border-blue-200 text-center">
+                  <h4 className="text-xs font-semibold text-blue-900 mb-1">Creativity</h4>
+                  <div className="text-xl font-bold text-blue-700">{player.creativity}</div>
+                  <div className="text-xs text-gray-600">
+                    #{player.creativity_rank_type}
+                  </div>
+                </div>
+
+                {/* Threat */}
+                <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-2 border border-red-200 text-center">
+                  <h4 className="text-xs font-semibold text-red-900 mb-1">Threat</h4>
+                  <div className="text-xl font-bold text-red-700">{player.threat}</div>
+                  <div className="text-xs text-gray-600">
+                    #{player.threat_rank_type}
                   </div>
                 </div>
               </div>
