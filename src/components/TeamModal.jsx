@@ -246,7 +246,7 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col"
+        className="bg-white rounded-lg shadow-2xl max-w-6xl w-full max-h-[95vh] flex flex-col overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -406,8 +406,8 @@ const TeamModal = ({ teamId, teamName, allPlayers, onClose, onPlayerClick, onTea
           )}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        {/* Squad */}
+        <div className="flex-1 p-6">
           {loading ? (
             <div className="text-center text-gray-500 py-8">Loading squad...</div>
           ) : (
